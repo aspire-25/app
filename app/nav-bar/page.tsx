@@ -3,7 +3,7 @@ import { User } from "lucide-react"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export function Navbar() {
+export function Page() {
     return (
         <div className="fixed top-0 left-0 right-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
         <div className="flex h-16 items-center px-4 max-w-7xl mx-auto">
