@@ -20,7 +20,7 @@ const AuditorHome = () => {
                     <CardContent>
                         <div className="text-2xl font-bold">Fiscal Year {new Date().getFullYear()}</div>
                         <p className="text-xs text-muted-foreground">
-                            View and edit company's revenues, expenses and profitability
+                            View and edit company&apos;s revenues, expenses and profitability
                         </p>
                     </CardContent>
                 </Card>
@@ -34,7 +34,7 @@ const AuditorHome = () => {
                     <CardContent>
                         <div className="text-2xl font-bold">Fiscal Year {new Date().getFullYear()}</div>
                         <p className="text-xs text-muted-foreground">
-                            View and edit company's assets, liabilities, and capital
+                            View and edit company&apos;s assets, liabilities, and capital
                         </p>
                     </CardContent>
                 </Card>
@@ -48,7 +48,7 @@ const AuditorHome = () => {
                     <CardContent>
                         <div className="text-2xl font-bold">Business Insight</div>
                         <p className="text-xs text-muted-foreground">
-                            Learn about company's performance and identify problems
+                            Learn about company&apos;s performance and identify problems
                         </p>
                     </CardContent>
                 </Card>
