@@ -7,7 +7,7 @@ const LoginPage = async () => {
 
     const session = await auth();
     if (session) {
-        redirect('/home');
+        redirect('/user/home');
     }
 
     return (
