@@ -1,6 +1,8 @@
+'use client';
+
 import React, { useState } from "react";
 
-const Dashboard: React.FC = () => {
+const AuditorHome: React.FC = () => {
   const [activeYear, setActiveYear] = useState<number>(2024);
   const years = [2022, 2023, 2024];
 
@@ -58,4 +60,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default AuditorHome;
