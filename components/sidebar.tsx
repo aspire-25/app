@@ -1,9 +1,11 @@
 import * as React from "react"
-import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
 import AppSidebarContent from "./sidebar-content"
 import { auth } from "@/auth";
 import { House } from "lucide-react";
+import AppSidebarFooter from "./sidebar-footer";
+
 
 const AppSidebar = async () => {
     const session = await auth();
@@ -29,12 +31,9 @@ const AppSidebar = async () => {
                 <AppSidebarContent role={session?.user?.role || null} />
                 {/**<NavProjects projects={data.projects} />*/}
             </SidebarContent>
-            {/**
-                <SidebarFooter>
-                <NavUser user={data.user} />
+            <SidebarFooter>
+                <AppSidebarFooter session={session} />
             </SidebarFooter>
-            */}
-
         </Sidebar>
     )
 }
