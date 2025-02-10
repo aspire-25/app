@@ -1,6 +1,6 @@
 ![Acceptance testing](https://github.com/aspire-25/app/actions/workflows/playwright.yml/badge.svg)
 
-![Vercel Deploy](https://deploy-badge.vercel.app/vercel/aspire-25?logo=Vercel)
+![Vercel](https://vercelbadge.vercel.app/api/junleyan/app414?style=plastic)
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
