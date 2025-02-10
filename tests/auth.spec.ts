@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 test('redirection signed user landing page', async ({ page }) => {
-    await page.goto('https://aspire-25.vercel.app/user/home');
+    await page.goto('https://aspire-25.vercel.app/user');
     await page.waitForTimeout(5000);
     await expect(page).toHaveURL('https://aspire-25.vercel.app/');
 });
