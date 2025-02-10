@@ -1,6 +1,6 @@
 ![Acceptance testing](https://github.com/aspire-25/app/actions/workflows/playwright.yml/badge.svg)
 
-![ci-badge](https://github.com/aspire-25/app/workflows/ci/badge.svg)
+![ci-badge](https://github.com/aspire-25/app/workflows/ci.yml/badge.svg)
 
 ![Vercel Deploy](https://deploy-badge.vercel.app/vercel/aspire-25?logo=Vercel)
 
