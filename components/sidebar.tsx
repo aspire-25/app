@@ -15,7 +15,7 @@ const AppSidebar = async () => {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <a href="/user/home">
+                            <a href="/user">
                                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                                     <House className="size-4" />
                                 </div>
