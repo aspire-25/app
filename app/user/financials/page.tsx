@@ -1,6 +1,6 @@
 'use client'
 
-export const getFinancials = async (dataType: string, year?: number) => {
+const getFinancials = async (dataType: string, year?: number) => {
     const queryParams = new URLSearchParams({ dataType });
 
     if (year) {
