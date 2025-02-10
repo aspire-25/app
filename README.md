@@ -1,5 +1,9 @@
 ![Acceptance testing](https://github.com/aspire-25/app/actions/workflows/playwright.yml/badge.svg)
 
+# ![ci-badge](https://github.com/aspire-25/app/workflows/ci-nextj-application-template/badge.svg)
+
+![Vercel Deploy](https://deploy-badge.vercel.app/vercel/aspire-25?logo=Vercel)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
