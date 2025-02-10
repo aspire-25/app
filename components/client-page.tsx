@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
-import AuditorHome from "./home/auditor-home";
+import AuditorHome from "./home/auditor/auditor-home";
+import AnalystHome from "./home/analyst/analyst-home"
 
 const Page = async ({ tab }: { tab: string }) => {
     const session = await auth();
@@ -23,7 +24,10 @@ const Page = async ({ tab }: { tab: string }) => {
                 if (session?.user.role === 'admin') {
                     // checking for admin because roles in db are all admin atm
                     return <AuditorHome />
+                } else if (session?.user.role === 'analyst') {
+                    return <AnalystHome />
                 }
+
                 return <DefaultContent />
             default: 
                 return <DefaultContent />;

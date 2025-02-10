@@ -1,7 +1,7 @@
 'use client';
 
 import { ChartNoAxesCombined, HandCoins, PiggyBank } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { useRouter } from "next/navigation";
 
 const AuditorHome = () => {
