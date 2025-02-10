@@ -42,7 +42,7 @@ const AnalystLanding = () => {
                     <AccordionTrigger>
                         <div>
                             <p className = "text-4xl">Stress Test 3</p>
-                            <p className = "base"> One-time "X" event of $50,000</p>
+                            <p className = "base"> One-time &quot;X&quot; event of $50,000</p>
                         </div>
                     </AccordionTrigger>
                     <AccordionContent>
