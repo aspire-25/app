@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import AuditorHome from "./home/auditor-home";
 
-const Page = async ({ tab }: { tab: string }) => {
+const Page = async () => {
     const session = await auth();
 
     const DefaultContent = () => {
@@ -14,20 +14,15 @@ const Page = async ({ tab }: { tab: string }) => {
                 </div>
                 <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
             </div>
-        ); 
+        );
     }
 
     const PageContent = () => {
-        switch (tab) {
-            case 'home':
-                if (session?.user.role === 'admin') {
-                    // checking for admin because roles in db are all admin atm
-                    return <AuditorHome />
-                }
-                return <DefaultContent />
-            default: 
-                return <DefaultContent />;
+        if (session?.user.role === 'admin') {
+            // checking for admin because roles in db are all admin atm
+            return <AuditorHome />
         }
+        return <DefaultContent />
     };
 
     return (

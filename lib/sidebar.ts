@@ -20,31 +20,31 @@ const SIDEBAR_SECTIONS: SidebarMenuSection[] = [
     {
         role: "all",
         title: "Home",
-        url: "/user/home",
+        url: "/user",
         icon: NotebookPen,
         isActive: false,
         items: [
             {
                 title: "Home",
                 name: 'home',
-                url: '/user/home',
+                url: '/user',
             }
         ]
     },
     {
         role: 'admin',
-        title: 'Auditor ',
-        url: '/user/input-data',
+        title: 'Auditor',
+        url: '/user/financials',
         icon: NotebookPen,
         isActive: true,
         items: [
             {
-                title: "Input Data",
-                name: 'input-data',
-                url: "/user/input-data",
+                title: "Statement Editor",
+                name: 'editor',
+                url: "/user/financials",
             },
             {
-                title: "View Data",
+                title: "Graph Viewer",
                 name: 'view-data',
                 url: "/user/view-data",
             }

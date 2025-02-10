@@ -14,7 +14,7 @@ const AppSidebarContent = ({ role }: { role: string | null }) => {
         if (role) {
             setFilteredSections(getFilteredSidebarSections(role));
         }
-    }, []);
+    }, [role]);
 
     return (
         <SidebarGroup>
