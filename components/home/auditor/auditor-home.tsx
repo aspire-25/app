@@ -16,7 +16,8 @@ import {
     AlertDialogCancel 
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { redirect } from 'next/navigation';  // Import redirect for programmatic navigation
+import { useRouter } from "next/navigation";
+
 
 const AuditorHome: React.FC = () => {
     const [activeYear, setActiveYear] = useState<string>("2024");
@@ -25,6 +26,7 @@ const AuditorHome: React.FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);  // State for delete confirmation
     const [yearToDelete, setYearToDelete] = useState<string | null>(null);  // Track the year to delete
+    const router = useRouter();
 
     const handleAddNewYear = () => {
         if (newYearName && !years.includes(newYearName)) {
@@ -51,7 +53,8 @@ const AuditorHome: React.FC = () => {
 
     // Use redirect to navigate when clicking the "Edit Sheet" button
     const handleEditSheet = () => {
-        redirect('/user/auditor/income-statement');  // Redirect to the desired path
+        console.log('Redirecting to edit-income-statements');
+        router.push('/user/edit-income-statements');  // Use router.push instead of redirect
     };
 
     return (
