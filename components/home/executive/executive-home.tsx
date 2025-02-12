@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import {useRouter} from "next/navigation";
 
 const ExecutiveHome: React.FC = () => {
   const [activeYear, setActiveYear] = useState<number>(2025);
@@ -10,6 +11,11 @@ const ExecutiveHome: React.FC = () => {
 
   const handleToggleExpand = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
+  };
+  const router = useRouter();
+  const handleOverview = () => {
+    console.log('Redirecting to overview');
+    router.push('/user/overview');
   };
 
   return (
@@ -40,9 +46,9 @@ const ExecutiveHome: React.FC = () => {
           ))}
         </div>
 
-        {/* Add Overview button */}
+        {/* Add Page button */}
         <div className="flex gap-2">
-          <button className="px-4 py-2 border rounded bg-white hover:bg-blue-200">Overview</button>
+          <button className="px-4 py-2 border rounded bg-white hover:bg-blue-200" onClick={handleOverview}>Overview</button>
         </div>
       </div>
 
