@@ -1,4 +1,5 @@
 // import { auth } from "@/auth";
+import { auth } from "@/auth";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -9,7 +10,7 @@ export default async function Layout({
 }: {
     children: React.ReactNode;
 }) {
-
+    const session = await auth();
     if (!session?.user) {
         redirect('/');
     }
