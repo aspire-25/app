@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import AuditorHome from "./home/auditor/auditor-home";
-import AnalystHome from "./home/analyst/analyst-home"
+import AnalystHome from "./home/analyst/analyst-home";
+import ExecutiveHome from "./home/executive/executive-home";
 
 const Page = async () => {
     const session = await auth();
@@ -23,6 +24,9 @@ const Page = async () => {
             return <AuditorHome />
         } else if (session?.user.role === 'analyst') {
             return <AnalystHome />
+        }
+        else if(session?.user.role === 'executive') {
+          return <ExecutiveHome />
         }
         return <DefaultContent />
     };
