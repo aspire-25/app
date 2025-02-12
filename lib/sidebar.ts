@@ -44,9 +44,9 @@ const SIDEBAR_SECTIONS: SidebarMenuSection[] = [
                 url: "/user/financials",
             },
             {
-                title: "Graph Viewer",
-                name: 'view-data',
-                url: "/user/view-data",
+                title: "Edit Income Statements",
+                name: 'edit-income-statements',
+                url: "/user/edit-income-statements",
             }
         ]
     },
