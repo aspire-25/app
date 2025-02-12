@@ -41,7 +41,6 @@ const ExecutiveHome: React.FC = () => {
 
         {/* Add New Year and Overview buttons */}
         <div className="flex gap-2">
-          <button className="px-4 py-2 border rounded bg-white hover:bg-blue-200">Add New Year</button>
           <button className="px-4 py-2 border rounded bg-white hover:bg-blue-200">Overview</button>
         </div>
       </div>
