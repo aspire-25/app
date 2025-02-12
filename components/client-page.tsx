@@ -30,7 +30,7 @@ const Page = () => {
     const PageContent = () => {
         /*
         if (session?.user.role === 'admin') {
-            return <ExecutiveHome />
+            return <AuditorHome />
         } else if (session?.user.role === 'analyst') {
             return <AnalystHome />
         }
