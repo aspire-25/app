@@ -18,14 +18,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 
-
 const AuditorHome: React.FC = () => {
     const [activeYear, setActiveYear] = useState<string>("2024");
     const [years, setYears] = useState<string[]>(["2022", "2023", "2024"]);
     const [newYearName, setNewYearName] = useState<string>("");
+
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);  // State for delete confirmation
-    const [yearToDelete, setYearToDelete] = useState<string | null>(null);  // Track the year to delete
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+    const [yearToDelete, setYearToDelete] = useState<string | null>(null);
+
     const router = useRouter();
 
     const handleAddNewYear = () => {
@@ -42,25 +43,28 @@ const AuditorHome: React.FC = () => {
             const updatedYears = years.filter(year => year !== yearToDelete);
             setYears(updatedYears);
 
-            // Handle active tab switching if the deleted year was active
             if (activeYear === yearToDelete && updatedYears.length > 0) {
                 setActiveYear(updatedYears[updatedYears.length - 1]);
             }
-            setIsDeleteDialogOpen(false);  // Close the delete confirmation dialog
-            setYearToDelete(null);  // Clear the year to delete
+            setIsDeleteDialogOpen(false);
+            setYearToDelete(null);
         }
     };
 
-    // Use redirect to navigate when clicking the "Edit Sheet" button
     const handleEditSheet = () => {
         console.log('Redirecting to edit-income-statements');
-        router.push('/user/edit-income-statements');  // Use router.push instead of redirect
+        router.push('/user/edit-income-statements');
+    };
+
+    const handleEditGraphs = () => {
+        console.log('Redirecting to edit-graphs');
+        router.push('/user/edit-graphs');
     };
 
     return (
         <div className="min-h-screen bg-gray-50 p-4">
             <header className="flex justify-between items-center bg-blue-400 p-4 rounded-xl shadow-md">
-                <h1 className="text-3xl font-bold text-black">spire</h1>
+                <h1 className="text-3xl font-bold text-black">Spire</h1>
                 <div className="flex items-center gap-4">
                     <Avatar>
                         <AvatarFallback>JD</AvatarFallback>
@@ -75,22 +79,24 @@ const AuditorHome: React.FC = () => {
             <Tabs value={activeYear} onValueChange={(value) => setActiveYear(value)} className="mt-4">
                 <TabsList className="flex gap-2 justify-start">
                     {years.map((year) => (
-                        <TabsTrigger key={year} value={year} className="rounded-xl">
+                        <TabsTrigger key={year} value={year} className="rounded-xl hover:bg-blue-200 transition-all">
                             {year}
                         </TabsTrigger>
                     ))}
 
                     <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <AlertDialogTrigger asChild>
-                            <Button variant="outline" className="rounded-xl" onClick={() => setIsDialogOpen(true)}>
+                            <Button 
+                                variant="outline" 
+                                className="rounded-xl hover:bg-blue-100 transition-all" 
+                                onClick={() => setIsDialogOpen(true)}
+                            >
                                 Add New Year
                             </Button>
                         </AlertDialogTrigger>
 
                         <AlertDialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-xl max-w-sm w-full">
-                            <AlertDialogCancel 
-                                className="absolute top-2 right-2 text-gray-500 hover:text-black cursor-pointer bg-transparent border-none"
-                            >
+                            <AlertDialogCancel className="absolute top-2 right-2 text-gray-500 hover:text-black cursor-pointer bg-transparent border-none">
                                 ✕
                             </AlertDialogCancel>
 
@@ -106,7 +112,11 @@ const AuditorHome: React.FC = () => {
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <Button onClick={handleAddNewYear} disabled={!newYearName.trim()}>
+                                <Button 
+                                    onClick={handleAddNewYear} 
+                                    disabled={!newYearName.trim()} 
+                                    className="hover:bg-blue-200 transition-all"
+                                >
                                     Add Year
                                 </Button>
                             </AlertDialogFooter>
@@ -123,7 +133,11 @@ const AuditorHome: React.FC = () => {
                                         <h3 className="text-2xl font-bold">Income Statement ({year})</h3>
                                         <p className="text-gray-600">30% drop in return rate of Investment</p>
                                     </div>
-                                    <Button variant="outline" className="rounded-xl" onClick={handleEditSheet}>
+                                    <Button 
+                                        variant="outline" 
+                                        className="rounded-xl hover:bg-blue-100 transition-all" 
+                                        onClick={handleEditSheet}
+                                    >
                                         Edit Sheet
                                     </Button>
                                 </CardContent>
@@ -133,13 +147,17 @@ const AuditorHome: React.FC = () => {
                                 <CardContent className="p-4 flex justify-between items-center">
                                     <h3 className="text-2xl font-bold">Graphs and Charts ({year})</h3>
                                     <div className="flex gap-2">
-                                        <Button variant="outline" className="rounded-xl">Add</Button>
-                                        <Button variant="outline" className="rounded-xl">View</Button>
+                                        <Button 
+                                            variant="outline" 
+                                            className="rounded-xl hover:bg-blue-100 transition-all" 
+                                            onClick={handleEditGraphs}
+                                        >
+                                            View
+                                        </Button>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            {/* Conditionally show the "Delete Year" button for the active year */}
                             {activeYear === year && (
                                 <div className="flex justify-end mt-4">
                                     <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
@@ -147,10 +165,10 @@ const AuditorHome: React.FC = () => {
                                             <Button
                                                 variant="outline"
                                                 onClick={() => {
-                                                    setYearToDelete(year); // Set the year to delete
-                                                    setIsDeleteDialogOpen(true); // Open the confirmation dialog
+                                                    setYearToDelete(year);
+                                                    setIsDeleteDialogOpen(true);
                                                 }}
-                                                className="text-black border-2 border-black px-4 py-2 rounded-xl"
+                                                className="text-black border-2 border-black px-4 py-2 rounded-xl hover:bg-gray-100 transition-all"
                                             >
                                                 Delete
                                             </Button>
@@ -164,12 +182,16 @@ const AuditorHome: React.FC = () => {
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
-                                                <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                                                <Button 
+                                                    variant="outline" 
+                                                    onClick={() => setIsDeleteDialogOpen(false)} 
+                                                    className="hover:bg-gray-200 transition-all"
+                                                >
                                                     Cancel
                                                 </Button>
                                                 <Button
                                                     variant="outline"
-                                                    className="text-red-600"
+                                                    className="text-red-600 hover:bg-red-200 transition-all"
                                                     onClick={handleDeleteYear}
                                                 >
                                                     Confirm Delete
