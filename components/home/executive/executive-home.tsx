@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from "react";
+import Image from "next/image";
 
 const ExecutiveHome: React.FC = () => {
   const [activeYear, setActiveYear] = useState<number>(2025);
@@ -14,7 +15,7 @@ const ExecutiveHome: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <header className="flex justify-between items-center bg-blue-400 p-4 rounded">
-        <h1 className="text-3xl font-bold text-black">Spire</h1>
+        <Image src="/spirelogo.png" alt="Spire Logo" width={120} height={40} className="object-contain" />
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-500">JD</div>
           <div>
@@ -39,7 +40,7 @@ const ExecutiveHome: React.FC = () => {
           ))}
         </div>
 
-        {/* Add New Year and Overview buttons */}
+        {/* Add Overview button */}
         <div className="flex gap-2">
           <button className="px-4 py-2 border rounded bg-white hover:bg-blue-200">Overview</button>
         </div>
