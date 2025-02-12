@@ -21,7 +21,7 @@ const Page = async () => {
 
     const PageContent = () => {
         if (session?.user.role === 'admin') {
-            return <AuditorHome />
+            return <ExecutiveHome />
         } else if (session?.user.role === 'analyst') {
             return <AnalystHome />
         }
