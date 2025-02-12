@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+// import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import Image from "next/image";
 
 const GraphDisplay: React.FC = () => {
