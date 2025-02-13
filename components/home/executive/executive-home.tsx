@@ -6,7 +6,7 @@ import {useRouter} from "next/navigation";
 
 const ExecutiveHome: React.FC = () => {
   const [activeYear, setActiveYear] = useState<number>(2025);
-  const years = [2022, 2023, 2024, 2025];
+  const years = [2025, 2026, 2027, 2028];
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const handleToggleExpand = (section: string) => {
@@ -54,7 +54,7 @@ const ExecutiveHome: React.FC = () => {
 
       <div className="mt-4 space-y-4">
         {[
-          "Stress Tests",
+          "Stress Test Results", //summary results from S1-S5
           "Income Statement",
           "Balance Sheet"
         ].map((title) => (
