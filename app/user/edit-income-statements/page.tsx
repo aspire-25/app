@@ -329,6 +329,7 @@ const autoSave = (name: string, value: number) => {
               <input
                 type="text"
                 value={otherIncomeExpense}
+                onChange={(e) => setNetIncome(parseInt(e.target.value))}
                 required
                 className="w-full p-3 border rounded-md"
               />
@@ -338,6 +339,7 @@ const autoSave = (name: string, value: number) => {
               <input
                 type="text"
                 value={otherIncomeExpense}
+                onChange={(e) => setIncomeTaxes(parseInt(e.target.value))}
                 required
                 className="w-full p-3 border rounded-md"
               />
