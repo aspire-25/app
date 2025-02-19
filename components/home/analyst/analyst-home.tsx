@@ -4,109 +4,41 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion"
-
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
 const AnalystLanding = () => {
+    const labels = [
+        {title: "Stress Test 1", description: "30% drop in return rate of investment"},
+        {title: "Stress Test 2", description: "60% sustained drop in return rate of Investment"},
+        {title: "Stress Test 3", description: "One-time &quot;X&quot; event of $50,000"},
+        {title: "Stress Test 4", description: "Increase 2.5% operating expenses each year"},
+        {title: "Stress Test 5", description: "Decrease bond return to 1.7% due to increase in inflation"},
+        {title: "Stress Test 5a", description: "Simple loan calculator 1"},
+        {title: "Stress Test 5b", description: "Simple loan calculator 2"}
+    ]
+    
     return (
-        <div className="m-10">
-            <Accordion type="single" collapsible >
-                <AccordionItem value="item-1">
-                    <AccordionTrigger>
+        <div>
+            {labels.map((item) => (
+                <Card className="shadow-sm rounded-xl">
+                    <CardContent className="p-4 flex justify-between items-center">
                         <div>
-                            <p className = "text-4xl">Stress Test 1</p>
-                            <p className = "base">Scenario #1 - 30% drop in return rate of Investment</p>
+                            <h3 className="text-2xl font-bold">{item.title}</h3>
+                            <p className = "base">{item.description}</p>
                         </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <p className = "base">Hey there</p>
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-
-            <Accordion type="single" collapsible>
-                <AccordionItem value="item-2">
-                    <AccordionTrigger>
-                        <div>
-                            <p className = "text-4xl">Stress Test 2</p>
-                            <p className = "base">60% sustained drop in return rate of Investment</p>
+                        <div className="flex gap-2">
+                            <Button 
+                                variant="outline" 
+                                className="rounded-xl hover:bg-blue-100 transition-all" 
+                            >
+                                View
+                            </Button>
                         </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <p className = "base">Hey there</p> 
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-
-            <Accordion type="single" collapsible>
-                <AccordionItem value="item-3">
-                    <AccordionTrigger>
-                        <div>
-                            <p className = "text-4xl">Stress Test 3</p>
-                            <p className = "base"> One-time &quot;X&quot; event of $50,000</p>
-                        </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <p className = "base">Hey there</p> 
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-
-            <Accordion type="single" collapsible>
-                <AccordionItem value="item-4">
-                    <AccordionTrigger>
-                        <div>
-                            <p className = "text-4xl">Stress Test 4</p>
-                            <p className = "base">Increase 2.5% operating expenses each year</p>
-                        </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <p className = "base">Hey there</p> 
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-
-            <Accordion type="single" collapsible>
-                <AccordionItem value="item-5">
-                    <AccordionTrigger>
-                        <div>
-                            <p className = "text-4xl">Stress Test 5</p>
-                            <p className = "base">Decrease bond return to 1.7% due to increase in inflation</p>
-                        </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <p className = "base">Hey there</p> 
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-
-
-            <Accordion type="single" collapsible>
-                <AccordionItem value="item-5a">
-                    <AccordionTrigger>
-                        <div>
-                            <p className = "text-4xl">Stress Test 5a</p>
-                            <p className = "base">Simple loan calculator</p>
-                        </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <p className = "base">Hey there</p> 
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-
-            <Accordion type="single" collapsible>
-                <AccordionItem value="item-5b">
-                    <AccordionTrigger>
-                        <div>
-                            <p className = "text-4xl">Stress Test 5b</p>
-                            <p className = "base">Simple loan calculator</p>
-                        </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <p className = "base">Hey there</p> 
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
+                    </CardContent>
+                </Card>
+            ))}
+           
         </div>
     )
 }

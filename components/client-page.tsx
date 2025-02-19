@@ -59,14 +59,15 @@ const Page = () => {
     };
 
     return (
-        <>
-            <Button onClick={() => updateTempRole("analyst")}>Analyst View</Button>
-            <Button onClick={() => updateTempRole("executive")}>Executive View</Button>
-            <Button onClick={() => updateTempRole("auditor")}>Auditor View</Button>
-            <Button onClick={() => updateTempRole("admin")}>Admin View</Button>
-            <p className="text-2xl">Currently Viewing: {tempRole} view</p>
+        <div>
+            <Button onClick={() => updateTempRole("analyst")} className = "m-1">Analyst View</Button>
+            <Button onClick={() => updateTempRole("executive")} className = "m-1">Executive View</Button>
+            <Button onClick={() => updateTempRole("auditor")} className = "m-1">Auditor View</Button>
+            <Button onClick={() => updateTempRole("admin")} className = "m-1">Admin View</Button>
+            <p className="text-base">Currently Viewing: {tempRole} view</p>
+            <br></br>
             <PageContent />
-        </>
+        </div>
         
     );
 }
