@@ -51,9 +51,14 @@ const AuditorHome: React.FC = () => {
         }
     };
 
-    const handleEditSheet = () => {
+    const handleIncomeSheet = () => {
         console.log('Redirecting to edit-income-statements');
         router.push('/user/edit-income-statements');
+    };
+
+    const handleBalanceSheet = () => {
+        console.log('Redirecting to edit-balance-sheet');
+        router.push('/user/edit-balance-sheet');
     };
 
     const handleEditGraphs = () => {
@@ -136,7 +141,22 @@ const AuditorHome: React.FC = () => {
                                     <Button 
                                         variant="outline" 
                                         className="rounded-xl hover:bg-blue-100 transition-all" 
-                                        onClick={handleEditSheet}
+                                        onClick={handleIncomeSheet}
+                                    >
+                                        Edit Sheet
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                            <Card className="shadow-sm rounded-xl">
+                                <CardContent className="p-4 flex justify-between items-center">
+                                    <div>
+                                        <h3 className="text-2xl font-bold">Balance Sheet ({year})</h3>
+                                        <p className="text-gray-600">30% drop in return rate of Investment</p>
+                                    </div>
+                                    <Button 
+                                        variant="outline" 
+                                        className="rounded-xl hover:bg-blue-100 transition-all" 
+                                        onClick={handleBalanceSheet}
                                     >
                                         Edit Sheet
                                     </Button>
