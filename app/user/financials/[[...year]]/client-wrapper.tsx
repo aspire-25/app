@@ -1,22 +1,14 @@
 'use client';
 
 import { BalanceSheet, FinancialReport, IncomeStatement } from "@/lib/fetch";
-import { useEffect, useReducer } from "react";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from "@/components/ui/tabs"
+import { useEffect, useReducer, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { DollarSign, Loader2, Plus, Save, Trash } from "lucide-react";
+import { redirect, useRouter } from "next/navigation";
 
 const INITIAL_STATE: FinancialReport = {
     balance: {
@@ -56,7 +48,8 @@ const INITIAL_STATE: FinancialReport = {
 type Action =
     | { type: 'UPDATE_BALANCE'; field: keyof BalanceSheet; value: number | null }
     | { type: 'UPDATE_INCOME'; field: keyof IncomeStatement; value: number | null }
-    | { type: 'SET_FINANCIALS'; data: FinancialReport };
+    | { type: 'SET_FINANCIALS'; data: FinancialReport }
+    | { type: 'UPDATE_YEAR'; year: number | null };
 
 const reducer = (state: FinancialReport, action: Action) => {
     switch (action.type) {
@@ -77,6 +70,17 @@ const reducer = (state: FinancialReport, action: Action) => {
                     [action.field]: action.value
                 }
             };
+        case 'UPDATE_YEAR':
+            return {
+                balance: {
+                    ...state.balance,
+                    year: action.year,
+                },
+                income: {
+                    ...state.income,
+                    year: action.year,
+                }
+            };
         case 'SET_FINANCIALS':
             return {
                 balance: action.data.balance ?? INITIAL_STATE.balance,
@@ -84,12 +88,13 @@ const reducer = (state: FinancialReport, action: Action) => {
             };
         default:
             return state;
-
     }
 }
 
 const ClientWrapper = ({ year }: { year: number | null }) => {
     const [financials, dispatchFinancials] = useReducer(reducer, INITIAL_STATE);
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         if (year) {
@@ -103,26 +108,124 @@ const ClientWrapper = ({ year }: { year: number | null }) => {
                 dispatchFinancials({ type: 'SET_FINANCIALS', data: DATA });
             };
             fetchData();
+        } else {
+            dispatchFinancials({ type: 'SET_FINANCIALS', data: INITIAL_STATE });
         }
-    }, []);
+    }, [year]);
 
     const handleIncomeChange = (field: keyof IncomeStatement, value: string) => {
-        const PARSED_VALUE = value.trim().length > 0 ? parseFloat(value) : null;
+        const PARSED_VALUE = value.trim() === "" || isNaN(Number(value)) ? null : parseFloat(value);
         dispatchFinancials({ type: 'UPDATE_INCOME', field, value: PARSED_VALUE });
     };
 
     const handleBalanceChange = (field: keyof BalanceSheet, value: string) => {
-        const PARSED_VALUE = value.trim().length > 0 ? parseFloat(value) : null;
+        const PARSED_VALUE = value.trim() === "" || isNaN(Number(value)) ? null : parseFloat(value);
         dispatchFinancials({ type: 'UPDATE_BALANCE', field, value: PARSED_VALUE });
     };
+
+    const handleYearChange = (value: string) => {
+        const PARSED_VALUE = value.trim() === "" || isNaN(Number(value)) ? null : parseFloat(value);
+        dispatchFinancials({ type: 'UPDATE_YEAR', year: PARSED_VALUE });
+    };
+
+    const handleSave = async () => {
+        setIsLoading(true);
+        const RESPONSE = await fetch(`/api/financials`, {
+            method: 'POST',
+            cache: 'no-store',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(financials)
+        });
+        setIsLoading(false);
+        if (RESPONSE.ok) {
+            router.push(`/user/financials/${financials.income.year}`);
+        }
+    };
+
+    const handleDelete = async () => {
+        setIsLoading(true);
+        const RESPONSE = await fetch(`/api/financials`, {
+            method: 'DELETE',
+            cache: 'no-store',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ year: financials.income.year })
+        });
+        setIsLoading(false);
+        if (RESPONSE.ok) {
+            router.push(`/user/financials`);
+        }
+    };
+
+    const renderInput = (
+        value: number | null,
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+    ) => (
+        <div className="relative">
+            <span className="absolute inset-y-0 left-2 flex items-center">
+                <DollarSign className="w-4 h-4" />
+            </span>
+            <Input className="pl-6" value={value ?? ""} onChange={onChange} />
+        </div>
+    );
 
     return (
         <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
             <Tabs defaultValue="income">
-                <TabsList className="grid grid-cols-2 w-[400px] mb-4">
-                    <TabsTrigger value="income">Income Statement</TabsTrigger>
-                    <TabsTrigger value="balance">Balance Sheet</TabsTrigger>
-                </TabsList>
+                <div className="flex justify-between items-center mb-5">
+                    <TabsList className="grid grid-cols-2 w-[400px]">
+                        <TabsTrigger value="income">Income Statement</TabsTrigger>
+                        <TabsTrigger value="balance">Balance Sheet</TabsTrigger>
+                    </TabsList>
+                    <div className="flex space-x-2">
+                        {year ?
+                            <>
+                                <Button disabled={isLoading} onClick={handleSave}>
+                                    {isLoading ?
+                                        <>
+                                            <Loader2 className="animate-spin" />
+                                            Saving...
+                                        </>
+                                        :
+                                        <>
+                                            <Save />
+                                            Save Changes
+                                        </>
+                                    }
+
+                                </Button>
+                                <Button variant="destructive" size="icon" disabled={isLoading} onClick={handleDelete}>
+                                    {isLoading ?
+                                        <Loader2 className="animate-spin" />
+                                        :
+                                        <Trash />
+                                    }
+                                </Button>
+                            </>
+                            :
+                            <div className="flex w-full max-w-sm items-center space-x-2">
+                                <Input value={financials.income.year ?? ""} placeholder="Enter Year" onChange={e => handleYearChange(e.target.value)} />
+                                <Button disabled={!financials.income.year || isLoading} onClick={handleSave}>
+                                    {isLoading ?
+                                        <>
+                                            <Loader2 className="animate-spin" />
+                                            Adding...
+                                        </>
+                                        :
+                                        <>
+                                            <Plus />
+                                            Add
+                                        </>
+                                    }
+                                </Button>
+                            </div>
+                        }
+                    </div>
+                </div>
+
                 <TabsContent value="income">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <Card>
@@ -135,27 +238,19 @@ const ClientWrapper = ({ year }: { year: number | null }) => {
                             <CardContent className="space-y-2">
                                 <div className="space-y-1">
                                     <Label>Revenue</Label>
-                                    <Input
-                                        value={financials.income.revenue ?? ""}
-                                        onChange={(e) => handleIncomeChange("revenue", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.revenue, e => handleIncomeChange("revenue", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Cost of Contracting</Label>
-                                    <Input
-                                        value={financials.income.contractingCost ?? ""}
-                                        onChange={(e) => handleIncomeChange("contractingCost", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.contractingCost, e => handleIncomeChange("contractingCost", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Overhead</Label>
-                                    <Input
-                                        value={financials.income.overhead ?? ""}
-                                        onChange={(e) => handleIncomeChange("overhead", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.overhead, e => handleIncomeChange("overhead", e.target.value))}
                                 </div>
                             </CardContent>
                         </Card>
+
                         <Card>
                             <CardHeader>
                                 <CardTitle>Operating Expenses</CardTitle>
@@ -166,34 +261,23 @@ const ClientWrapper = ({ year }: { year: number | null }) => {
                             <CardContent className="space-y-2">
                                 <div className="space-y-1">
                                     <Label>Salaries and Benefits</Label>
-                                    <Input
-                                        value={financials.income.salary ?? ""}
-                                        onChange={(e) => handleIncomeChange("salary", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.salary, e => handleIncomeChange("salary", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Rent and Overhead</Label>
-                                    <Input
-                                        value={financials.income.rent ?? ""}
-                                        onChange={(e) => handleIncomeChange("rent", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.rent, e => handleIncomeChange("rent", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Depreciation and Amortization</Label>
-                                    <Input
-                                        value={financials.income.depreciation ?? ""}
-                                        onChange={(e) => handleIncomeChange("depreciation", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.depreciation, e => handleIncomeChange("depreciation", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Interest</Label>
-                                    <Input
-                                        value={financials.income.operatingInterest ?? ""}
-                                        onChange={(e) => handleIncomeChange("operatingInterest", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.operatingInterest, e => handleIncomeChange("operatingInterest", e.target.value))}
                                 </div>
                             </CardContent>
                         </Card>
+
                         <Card>
                             <CardHeader>
                                 <CardTitle>Financial Adjustments & Other Income</CardTitle>
@@ -204,38 +288,23 @@ const ClientWrapper = ({ year }: { year: number | null }) => {
                             <CardContent className="space-y-2">
                                 <div className="space-y-1">
                                     <Label>Interest Income</Label>
-                                    <Input
-                                        value={financials.income.interestIncome ?? ""}
-                                        onChange={(e) => handleIncomeChange("interestIncome", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.interestIncome, e => handleIncomeChange("interestIncome", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Interest Expense</Label>
-                                    <Input
-                                        value={financials.income.interestExpense ?? ""}
-                                        onChange={(e) => handleIncomeChange("interestExpense", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.interestExpense, e => handleIncomeChange("interestExpense", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Gain (Loss) on Disposal of Assets</Label>
-                                    <Input
-                                        value={financials.income.assetGain ?? ""}
-                                        onChange={(e) => handleIncomeChange("assetGain", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.assetGain, e => handleIncomeChange("assetGain", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Other Income (Expense)</Label>
-                                    <Input
-                                        value={financials.income.otherIncome ?? ""}
-                                        onChange={(e) => handleIncomeChange("otherIncome", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.otherIncome, e => handleIncomeChange("otherIncome", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Income Taxes</Label>
-                                    <Input
-                                        value={financials.income.incomeTax ?? ""}
-                                        onChange={(e) => handleIncomeChange("incomeTax", e.target.value)}
-                                    />
+                                    {renderInput(financials.income.incomeTax, e => handleIncomeChange("incomeTax", e.target.value))}
                                 </div>
                             </CardContent>
                         </Card>
@@ -254,41 +323,27 @@ const ClientWrapper = ({ year }: { year: number | null }) => {
                             <CardContent className="space-y-2">
                                 <div className="space-y-1">
                                     <Label>Cash and Cash Equivalents</Label>
-                                    <Input
-                                        value={financials.balance.cash ?? ""}
-                                        onChange={(e) => handleBalanceChange("cash", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.cash, e => handleBalanceChange("cash", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Accounts Receivable</Label>
-                                    <Input
-                                        value={financials.balance.accountReceivable ?? ""}
-                                        onChange={(e) => handleBalanceChange("accountReceivable", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.accountReceivable, e => handleBalanceChange("accountReceivable", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Inventory</Label>
-                                    <Input
-                                        value={financials.balance.inventory ?? ""}
-                                        onChange={(e) => handleBalanceChange("inventory", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.inventory, e => handleBalanceChange("inventory", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Property, Plant, and Equipment</Label>
-                                    <Input
-                                        value={financials.balance.longTermProperty ?? ""}
-                                        onChange={(e) => handleBalanceChange("longTermProperty", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.longTermProperty, e => handleBalanceChange("longTermProperty", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Investment</Label>
-                                    <Input
-                                        value={financials.balance.longTermAsset ?? ""}
-                                        onChange={(e) => handleBalanceChange("longTermAsset", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.longTermAsset, e => handleBalanceChange("longTermAsset", e.target.value))}
                                 </div>
                             </CardContent>
                         </Card>
+
                         <Card>
                             <CardHeader>
                                 <CardTitle>Liabilities and Equity</CardTitle>
@@ -299,52 +354,31 @@ const ClientWrapper = ({ year }: { year: number | null }) => {
                             <CardContent className="space-y-2">
                                 <div className="space-y-1">
                                     <Label>Accounts Payable</Label>
-                                    <Input
-                                        value={financials.balance.accountPayable ?? ""}
-                                        onChange={(e) => handleBalanceChange("accountPayable", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.accountPayable, e => handleBalanceChange("accountPayable", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Current Debt Service</Label>
-                                    <Input
-                                        value={financials.balance.currentDebtService ?? ""}
-                                        onChange={(e) => handleBalanceChange("currentDebtService", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.currentDebtService, e => handleBalanceChange("currentDebtService", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Taxes Payable</Label>
-                                    <Input
-                                        value={financials.balance.taxPayable ?? ""}
-                                        onChange={(e) => handleBalanceChange("taxPayable", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.taxPayable, e => handleBalanceChange("taxPayable", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Long-term Debt Service</Label>
-                                    <Input
-                                        value={financials.balance.longTermDebtService ?? ""}
-                                        onChange={(e) => handleBalanceChange("longTermDebtService", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.longTermDebtService, e => handleBalanceChange("longTermDebtService", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Loans Payable</Label>
-                                    <Input
-                                        value={financials.balance.loanPayable ?? ""}
-                                        onChange={(e) => handleBalanceChange("loanPayable", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.loanPayable, e => handleBalanceChange("loanPayable", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Equity Capital</Label>
-                                    <Input
-                                        value={financials.balance.equityCapital ?? ""}
-                                        onChange={(e) => handleBalanceChange("equityCapital", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.equityCapital, e => handleBalanceChange("equityCapital", e.target.value))}
                                 </div>
                                 <div className="space-y-1">
                                     <Label>Retained Earnings</Label>
-                                    <Input
-                                        value={financials.balance.retainedEarning ?? ""}
-                                        onChange={(e) => handleBalanceChange("retainedEarning", e.target.value)}
-                                    />
+                                    {renderInput(financials.balance.retainedEarning, e => handleBalanceChange("retainedEarning", e.target.value))}
                                 </div>
                             </CardContent>
                         </Card>
