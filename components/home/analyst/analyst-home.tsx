@@ -1,11 +1,6 @@
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import StressTest1 from "./stress-test-1"
 
 const AnalystLanding = () => {
     const labels = [
@@ -19,9 +14,9 @@ const AnalystLanding = () => {
     ]
     
     return (
-        <div>
+        <div className="m-5">
             {labels.map((item) => (
-                <Card className="shadow-sm rounded-xl">
+                <Card className="shadow-sm rounded-xl mt-5 mb-5">
                     <CardContent className="p-4 flex justify-between items-center">
                         <div>
                             <h3 className="text-2xl font-bold">{item.title}</h3>
@@ -30,15 +25,16 @@ const AnalystLanding = () => {
                         <div className="flex gap-2">
                             <Button 
                                 variant="outline" 
-                                className="rounded-xl hover:bg-blue-100 transition-all" 
-                            >
-                                View
+                                className="rounded-xl hover:bg-blue-100 transition-all" >
+                                <p className="text-2xl p-5">Open</p>
                             </Button>
                         </div>
                     </CardContent>
+                    <CardContent>
+                        <StressTest1 />
+                    </CardContent>
                 </Card>
             ))}
-           
         </div>
     )
 }
