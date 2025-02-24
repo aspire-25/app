@@ -2,9 +2,7 @@ import { auth } from '@/auth';
 import { deleteFinancials, fetchFinancials, updateFinancials } from '@/lib/fetch';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Disable caching for this route
-export const fetchCache = 'force-no-store';
-export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     const session = await auth();
