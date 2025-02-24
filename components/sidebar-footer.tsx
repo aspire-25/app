@@ -2,10 +2,12 @@
 
 import { ChevronsUpDown, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
+import { DropdownMenuGroup } from "@radix-ui/react-dropdown-menu";
+import { useTheme } from "next-themes";
 
 const getInitials = (name: string): string => {
     const WORDS = name.trim().split(/\s+/);
@@ -19,7 +21,7 @@ const getInitials = (name: string): string => {
 };
 
 const getRolename = (role: string): string => {
-    switch(role) {
+    switch (role) {
         case 'auditor':
             return 'Auditor';
         case 'analyst':
@@ -36,6 +38,8 @@ const getRolename = (role: string): string => {
 const AppSidebarFooter = ({ session }: { session: Session | null }) => {
 
     const { isMobile } = useSidebar();
+    const { setTheme } = useTheme();
+
     if (!session?.user?.image || !session?.user?.name || !session?.user?.email || !session?.user?.role) {
         return <></>;
     }
@@ -79,6 +83,24 @@ const AppSidebarFooter = ({ session }: { session: Session | null }) => {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                                <span>Toggle theme</span>
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuPortal>
+                                <DropdownMenuSubContent>
+                                    <DropdownMenuItem onClick={() => setTheme("light")}>
+                                        Light
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setTheme("dark")}>
+                                        Dark
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setTheme("system")}>
+                                        System
+                                    </DropdownMenuItem>
+                                </DropdownMenuSubContent>
+                            </DropdownMenuPortal>
+                        </DropdownMenuSub>
                         <DropdownMenuItem onClick={() => signOut({ redirectTo: '/' })}>
                             <LogOut />
                             Log out
