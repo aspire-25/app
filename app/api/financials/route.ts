@@ -2,8 +2,6 @@ import { auth } from '@/auth';
 import { deleteFinancials, fetchFinancials, updateFinancials } from '@/lib/fetch';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET() {
     const session = await auth();
     if (session) {
@@ -31,7 +29,7 @@ export async function POST(req: NextRequest) {
     if (session) {
         const DATA = await req.json();
 
-        updateFinancials(DATA);
+        await updateFinancials(DATA);
         return NextResponse.json(
             DATA,
             {
@@ -53,7 +51,7 @@ export async function DELETE(req: NextRequest) {
     if (session) {
         const YEAR: number = (await req.json()).year;
 
-        deleteFinancials(YEAR);
+        await deleteFinancials(YEAR);
         return NextResponse.json(
             {},
             {
