@@ -45,30 +45,29 @@ export default async function Layout({
                                     Statement Editor
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbSeparator className="hidden md:block" />
-                            <BreadcrumbItem>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger className="flex items-center gap-1">
-                                        {YEAR || 'Select Year'}
-                                        {Object.keys(FINANCIALS).length > 0 &&
-                                            <BreadcrumbSeparator className="hidden md:block rotate-90" />
-                                        }
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start">
-                                        {Object.keys(FINANCIALS).length > 0 ?
-                                            Object.keys(FINANCIALS).map((yearKey) => (
-                                                <Link key={yearKey} href={`/user/financials/${yearKey}`}>
-                                                    <DropdownMenuItem>
-                                                        {yearKey}
-                                                    </DropdownMenuItem>
-                                                </Link>
-                                            ))
-                                            :
-                                            <DropdownMenuItem>None</DropdownMenuItem>
-                                        }
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </BreadcrumbItem>
+                            {Object.keys(FINANCIALS).length > 0 &&
+                                <>
+                                    <BreadcrumbSeparator className="hidden md:block" />
+                                    <BreadcrumbItem>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger className="flex items-center gap-1">
+                                                {YEAR || 'Select Year'}
+                                                <BreadcrumbSeparator className="hidden md:block rotate-90" />
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="start">
+                                                {Object.keys(FINANCIALS).map((yearKey) => (
+                                                        <Link key={yearKey} href={`/user/financials/${yearKey}`}>
+                                                            <DropdownMenuItem>
+                                                                {yearKey}
+                                                            </DropdownMenuItem>
+                                                        </Link>
+                                                    ))
+                                                }
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </BreadcrumbItem>
+                                </>
+                            }
                         </BreadcrumbList>
                     </Breadcrumb>
                 </div>
