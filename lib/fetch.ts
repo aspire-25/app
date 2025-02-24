@@ -1,3 +1,4 @@
+
 import { sql } from "@vercel/postgres";
 
 export type BalanceSheet = {
@@ -64,74 +65,79 @@ export const fetchFinancials = async (): Promise<Record<number, FinancialReport>
 };
 
 export const updateFinancials = async (data: FinancialReport) => {
-    const YEAR_EXIST = await sql.query(`SELECT * FROM "BalanceSheets" WHERE year = ${data.income.year};`);
+    try {
+        const YEAR_EXIST = await sql.query(`SELECT * FROM "BalanceSheets" WHERE year = ${data.income.year};`);
 
-    if (YEAR_EXIST.rowCount === 0) {
-        const INSERT_BALANCE_QUERY = `
-            INSERT INTO "BalanceSheets" 
-            (year, cash, "accountReceivable", inventory, "longTermProperty", "longTermAsset", 
-            "accountPayable", "currentDebtService", "taxPayable", "longTermDebtService", 
-            "loanPayable", "equityCapital", "retainedEarning")
-            VALUES 
-            (${data.balance.year}, ${data.balance.cash}, ${data.balance.accountReceivable}, ${data.balance.inventory}, 
-            ${data.balance.longTermProperty}, ${data.balance.longTermAsset}, 
-            ${data.balance.accountPayable}, ${data.balance.currentDebtService}, 
-            ${data.balance.taxPayable}, ${data.balance.longTermDebtService}, 
-            ${data.balance.loanPayable}, ${data.balance.equityCapital}, 
-            ${data.balance.retainedEarning});
-        `;
+        if (YEAR_EXIST.rowCount === 0) {
+            const INSERT_BALANCE_QUERY = `
+                INSERT INTO "BalanceSheets" 
+                (year, cash, "accountReceivable", inventory, "longTermProperty", "longTermAsset", 
+                "accountPayable", "currentDebtService", "taxPayable", "longTermDebtService", 
+                "loanPayable", "equityCapital", "retainedEarning")
+                VALUES 
+                (${data.balance.year}, ${data.balance.cash}, ${data.balance.accountReceivable}, ${data.balance.inventory}, 
+                ${data.balance.longTermProperty}, ${data.balance.longTermAsset}, 
+                ${data.balance.accountPayable}, ${data.balance.currentDebtService}, 
+                ${data.balance.taxPayable}, ${data.balance.longTermDebtService}, 
+                ${data.balance.loanPayable}, ${data.balance.equityCapital}, 
+                ${data.balance.retainedEarning});
+            `;
 
-        const INSERT_INCOME_QUERY = `
-            INSERT INTO "IncomeStatements" 
-            (year, revenue, "contractingCost", overhead, salary, rent, depreciation, 
-            "operatingInterest", "interestIncome", "interestExpense", "assetGain", "otherIncome", "incomeTax")
-            VALUES 
-            (${data.income.year}, ${data.income.revenue}, ${data.income.contractingCost}, ${data.income.overhead}, 
-            ${data.income.salary}, ${data.income.rent}, ${data.income.depreciation}, 
-            ${data.income.operatingInterest}, ${data.income.interestIncome}, 
-            ${data.income.interestExpense}, ${data.income.assetGain}, 
-            ${data.income.otherIncome}, ${data.income.incomeTax});
-        `;
+            const INSERT_INCOME_QUERY = `
+                INSERT INTO "IncomeStatements" 
+                (year, revenue, "contractingCost", overhead, salary, rent, depreciation, 
+                "operatingInterest", "interestIncome", "interestExpense", "assetGain", "otherIncome", "incomeTax")
+                VALUES 
+                (${data.income.year}, ${data.income.revenue}, ${data.income.contractingCost}, ${data.income.overhead}, 
+                ${data.income.salary}, ${data.income.rent}, ${data.income.depreciation}, 
+                ${data.income.operatingInterest}, ${data.income.interestIncome}, 
+                ${data.income.interestExpense}, ${data.income.assetGain}, 
+                ${data.income.otherIncome}, ${data.income.incomeTax});
+            `;
 
-        await sql.query(INSERT_BALANCE_QUERY);
-        await sql.query(INSERT_INCOME_QUERY);
-    } else {
-        const UPDATE_BALANCE_QUERY = `
-            UPDATE "BalanceSheets"
-            SET cash = ${data.balance.cash},
-                "accountReceivable" = ${data.balance.accountReceivable},
-                inventory = ${data.balance.inventory},
-                "longTermProperty" = ${data.balance.longTermProperty},
-                "longTermAsset" = ${data.balance.longTermAsset},
-                "accountPayable" = ${data.balance.accountPayable},
-                "currentDebtService" = ${data.balance.currentDebtService},
-                "taxPayable" = ${data.balance.taxPayable},
-                "longTermDebtService" = ${data.balance.longTermDebtService},
-                "loanPayable" = ${data.balance.loanPayable},
-                "equityCapital" = ${data.balance.equityCapital},
-                "retainedEarning" = ${data.balance.retainedEarning}
-            WHERE year = ${data.balance.year};
-        `;
+            await sql.query(INSERT_BALANCE_QUERY);
+            await sql.query(INSERT_INCOME_QUERY);
+        } else {
+            const UPDATE_BALANCE_QUERY = `
+                UPDATE "BalanceSheets"
+                SET cash = ${data.balance.cash},
+                    "accountReceivable" = ${data.balance.accountReceivable},
+                    inventory = ${data.balance.inventory},
+                    "longTermProperty" = ${data.balance.longTermProperty},
+                    "longTermAsset" = ${data.balance.longTermAsset},
+                    "accountPayable" = ${data.balance.accountPayable},
+                    "currentDebtService" = ${data.balance.currentDebtService},
+                    "taxPayable" = ${data.balance.taxPayable},
+                    "longTermDebtService" = ${data.balance.longTermDebtService},
+                    "loanPayable" = ${data.balance.loanPayable},
+                    "equityCapital" = ${data.balance.equityCapital},
+                    "retainedEarning" = ${data.balance.retainedEarning}
+                WHERE year = ${data.balance.year};
+            `;
 
-        const UPDATE_INCOME_QUERY = `
-            UPDATE "IncomeStatements"
-            SET revenue = ${data.income.revenue},
-                "contractingCost" = ${data.income.contractingCost},
-                overhead = ${data.income.overhead},
-                salary = ${data.income.salary},
-                rent = ${data.income.rent},
-                depreciation = ${data.income.depreciation},
-                "operatingInterest" = ${data.income.operatingInterest},
-                "interestIncome" = ${data.income.interestIncome},
-                "interestExpense" = ${data.income.interestExpense},
-                "assetGain" = ${data.income.assetGain},
-                "otherIncome" = ${data.income.otherIncome},
-                "incomeTax" = ${data.income.incomeTax}
-            WHERE year = ${data.income.year};
-        `;
+            const UPDATE_INCOME_QUERY = `
+                UPDATE "IncomeStatements"
+                SET revenue = ${data.income.revenue},
+                    "contractingCost" = ${data.income.contractingCost},
+                    overhead = ${data.income.overhead},
+                    salary = ${data.income.salary},
+                    rent = ${data.income.rent},
+                    depreciation = ${data.income.depreciation},
+                    "operatingInterest" = ${data.income.operatingInterest},
+                    "interestIncome" = ${data.income.interestIncome},
+                    "interestExpense" = ${data.income.interestExpense},
+                    "assetGain" = ${data.income.assetGain},
+                    "otherIncome" = ${data.income.otherIncome},
+                    "incomeTax" = ${data.income.incomeTax}
+                WHERE year = ${data.income.year};
+            `;
 
-        await sql.query(UPDATE_BALANCE_QUERY);
-        await sql.query(UPDATE_INCOME_QUERY);
+            await sql.query(UPDATE_BALANCE_QUERY);
+            await sql.query(UPDATE_INCOME_QUERY);
+        }
+    } catch (error) {
+        console.error("Error updating financials:", error);
+        throw new Error("Failed to update financials");
     }
 };
 
