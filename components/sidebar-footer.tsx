@@ -6,7 +6,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
-import { DropdownMenuGroup } from "@radix-ui/react-dropdown-menu";
 import { useTheme } from "next-themes";
 
 const getInitials = (name: string): string => {
