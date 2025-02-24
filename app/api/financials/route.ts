@@ -2,6 +2,8 @@ import { auth } from '@/auth';
 import { deleteFinancials, fetchFinancials, updateFinancials } from '@/lib/fetch';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     const session = await auth();
     if (session) {
