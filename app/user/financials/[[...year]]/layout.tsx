@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { fetchFinancials } from "@/lib/fetch";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -27,6 +28,7 @@ export default async function Layout({
     if (YEAR && !Object.keys(FINANCIALS).includes(YEAR[0])) {
         redirect('/user/financials');
     }
+    revalidatePath('/user/financials', 'layout');
 
     return (
         <>
