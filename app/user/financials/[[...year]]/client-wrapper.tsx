@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DollarSign, Loader2, Plus, Save, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 const INITIAL_STATE: FinancialReport = {
     balance: {
@@ -156,6 +157,7 @@ const ClientWrapper = ({ year }: { year: number | null }) => {
         });
         setIsLoading(false);
         if (RESPONSE.ok) {
+            revalidatePath('/user/financials', 'layout');
             router.push(`/user/financials`);
         }
     };
