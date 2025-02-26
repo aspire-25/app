@@ -7,14 +7,27 @@ import {useRouter} from "next/navigation";
 const ExecutiveHome: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>("Stress Test Results");
   const sections = ["Stress Test Results", "Sustainability Model"];
-  const [toggleOn, setToggleOn] = useState<boolean>(false);
+  const [toggles, setToggles] = useState<boolean[]>(Array(5).fill(false));
+  const stressTestDesc = [
+    "Scenario #1: 30% drop in return rate of investment",
+    "Scenario #2: 60% sustained drop in returned rate of investment",
+    "Scenario #3: One- time X event of $50,000",
+    "Scenario #4: Increase 2.5% operating expenses each year",
+    "Scenario #5: Decrease bond return to 1.7% due to increase in inflation"
+  ]
 
-  /*const handleToggleExpand = (section: string) => {
-    setExpandedSection(expandedSection === section ? null : section);
-  };*/
   const router = useRouter();
   const handleOverview = () => {
     router.push('/user/overview');
+  };
+
+  // Toggle function
+  const toggleSwitch = (index: number) => {
+    setToggles((prev) => {
+      const updatedToggles = [...prev];
+      updatedToggles[index] = !updatedToggles[index];
+      return updatedToggles;
+    });
   };
 
   return (
@@ -55,26 +68,28 @@ const ExecutiveHome: React.FC = () => {
       {/* Dynamic Content Based on Active Section */}
       <div className="mt-4 p-4 bg-white rounded shadow-md">
         {activeSection === "Stress Test Results" ? (
-          <div className="flex flex-col items-center">
-            <h3 className="text-xl font-bold mb-2">Stress Test #1</h3>
-
-            {/* Toggle Switch */}
-            <div
-              className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
-                ${toggleOn ? "bg-green-500" : "bg-gray-300"}`}
-              onClick={() => setToggleOn(!toggleOn)}
-            >
-              <div
-                className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300
-                  ${toggleOn ? "translate-x-6" : "translate-x-0"}`}
-              ></div>
-            </div>
-
-            {/* Stress Test Description */}
-            <p className="mt-2 text-gray-700">Scenario #1: 30% drop in return rate of investment</p>
+          <div className="space-y-4">
+            {toggles.map((isOn, index) => (
+              <div key={index}>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold">Stress Test #{index + 1}</h3>
+                  <div
+                    className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
+                      ${isOn ? "bg-green-500" : "bg-gray-300"}`}
+                    onClick={() => toggleSwitch(index)}
+                  >
+                    <div
+                      className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300
+                        ${isOn ? "translate-x-6" : "translate-x-0"}`}
+                    ></div>
+                  </div>
+                </div>
+                <p className="mt-2 text-gray-700">{stressTestDesc[index]}</p>
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="flex justify-center items-center p-4 border rounded bg-gray-100">
+          <div className="p-4 border rounded bg-gray-100">
             <p className="text-gray-600">📊 Sustainability Model Graph Placeholder</p>
           </div>
         )}
@@ -82,5 +97,6 @@ const ExecutiveHome: React.FC = () => {
     </div>
   );
 };
+
 
 export default ExecutiveHome;
