@@ -75,7 +75,7 @@ const ExecutiveHome: React.FC = () => {
             {/* Expanded content */}
             {expandedSection === title && (
               <div className="mt-2 p-4 bg-white border rounded shadow-md">
-                <p>Data goes here</p>
+                <p>Graphs will go here</p>
               </div>
             )}
           </div>

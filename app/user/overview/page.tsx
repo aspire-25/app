@@ -5,7 +5,7 @@ const Overview: React.FC = () => {
     <div className="min-h-screen bg-gray-50 p-4">
       <h1 className="text-3xl font-bold">Overview</h1>
       <div className="mt-2">
-        <p>Will be able to view totals and details from SM sheet.</p>
+        <p>Will be able to view high-level trends over the years.</p>
       </div>
     </div>
   );
