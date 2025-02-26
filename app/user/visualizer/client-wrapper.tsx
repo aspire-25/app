@@ -44,7 +44,7 @@ const ClientWrapper = () => {
             </div>
 
             <TabsContent value="table">
-                {financials && (
+                {financials ? (
                     <Table>
                         <TableCaption>THIS IS THE END</TableCaption>
                         <TableHeader>
@@ -69,6 +69,12 @@ const ClientWrapper = () => {
                             })}
                         </TableBody>
                     </Table>
+                ) : (
+                    <div className="grid auto-rows-min gap-4 md:grid-cols-1">
+                        <div className="h-48 rounded-xl bg-muted/50" />
+                        <div className="h-48 rounded-xl bg-muted/50" />
+                        <div className="h-48 rounded-xl bg-muted/50" />
+                    </div>
                 )}
             </TabsContent>
 
