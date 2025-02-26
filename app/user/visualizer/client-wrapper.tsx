@@ -51,7 +51,7 @@ const ClientWrapper = () => {
                             <TableRow>
                                 <TableHead></TableHead>
                                 {years.map((year) => (
-                                    <TableHead key={year}>{year}</TableHead>
+                                    <TableHead className="font-bold" key={year}>{year}</TableHead>
                                 ))}
                             </TableRow>
                         </TableHeader>
