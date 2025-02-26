@@ -41,6 +41,52 @@ export type FinancialReport = {
     income: IncomeStatement;
 };
 
+export type FinancialReportCollection = {
+    [year: string]: FinancialReport;
+}
+
+export type CalculatedFinancialReport = {
+    balance: CalculatedBalanceSheet;
+    income: CalculatedIncomeStatement;
+}
+
+export type CalculatedFinancialReportCollection = {
+    [year: string]: CalculatedFinancialReport;
+};
+
+export type CalculatedBalanceSheet = {
+    totalCurrentAssets: number;
+    totalLongTermAssets: number;
+    totalAssets: number;
+    totalCurrentLiabilities: number;
+    totalLongTermLiabilities: number;
+    totalLiabilities: number;
+    totalStockholdersEquity: number;
+    totalLiabilitiesAndEquity: number;
+}
+
+export type CalculatedIncomeStatement = {
+    netSales: number;
+    costOfGoodsSold: number;
+    grossProfit: number;
+    grossMargin: string;
+    totalOperatingExpenses: number;
+    operatingExpenses: string;
+    profitFromOperations: number;
+    profitFromOperationsMargin: string;
+    totalOtherIncome: number;
+    totalOtherIncomeMargin: string;
+    incomeBeforeTax: number;
+    incomeBeforeTaxMargin: string;
+    netIncome: number;
+    netIncomeMargin: string;
+}
+
+export type TransformedFinancialReportCollection = {
+    [K in keyof CalculatedBalanceSheet | keyof CalculatedIncomeStatement]: 
+        (CalculatedBalanceSheet & CalculatedIncomeStatement)[K] extends number ? number[] : string[];
+};
+
 export const fetchFinancials = async (): Promise<Record<number, FinancialReport>> => {
     const BALANCE_QUERY = `SELECT * FROM "BalanceSheets" ORDER BY year DESC;`;
     const INCOME_QUERY = `SELECT * FROM "IncomeStatements" ORDER BY year DESC;`;
