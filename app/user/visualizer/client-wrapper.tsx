@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalculatedFinancialReportCollection, FinancialReportCollection, TransformedBalanceSheetCollection, TransformedFinancialReportCollection, TransformedIncomeStatementCollection } from "@/lib/fetch";
+import { CalculatedFinancialReportCollection, FinancialReportCollection, TransformedBalanceSheetCollection, TransformedIncomeStatementCollection } from "@/lib/fetch";
 import { calculateBalanceSheet, calculateIncomeStatement, getColumnLabel, transformCalculatedFinancialReportCollection } from "@/lib/financials";
 import { useEffect, useState } from "react";
 
