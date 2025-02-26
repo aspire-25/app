@@ -11,7 +11,7 @@ const ExecutiveHome: React.FC = () => {
   const stressTestDesc = [
     "Scenario #1: 30% drop in return rate of investment",
     "Scenario #2: 60% sustained drop in returned rate of investment",
-    "Scenario #3: One- time X event of $50,000",
+    "Scenario #3: One-time \"X\" event of $50,000",
     "Scenario #4: Increase 2.5% operating expenses each year",
     "Scenario #5: Decrease bond return to 1.7% due to increase in inflation"
   ]
@@ -84,7 +84,15 @@ const ExecutiveHome: React.FC = () => {
                     ></div>
                   </div>
                 </div>
+                {/*Stress Test Description*/}
                 <p className="mt-2 text-gray-700">{stressTestDesc[index]}</p>
+
+                {/*Graph Placeholder - only shows if toggle is on*/}
+                {isOn && (
+                  <div className="mt-2 p-4 border rounded bg-gray-100">
+                    <p className="text-gray-600">📊 Graph Placeholder for Stress Test #{index + 1}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
