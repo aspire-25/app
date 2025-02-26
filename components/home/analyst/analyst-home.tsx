@@ -31,6 +31,7 @@ const AnalystLanding = () => {
                         </div>
                     </CardContent>
                     <CardContent>
+                        <br></br>
                         {(item.title == "Stress Test 1") && <StressTest1 />}
                     </CardContent>
                 </Card>

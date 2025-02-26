@@ -63,25 +63,25 @@ const StressTest1 = () => {
                         <Label htmlFor="presentValue" className="mb-1">Present Value ($)</Label>
                         <div className="flex">
                             <Input type="number" id="presentValue" placeholder="" className="text-lg mb-3" onChange={handleUpdate} value={modelParams.presentValue} name="presentValue"/>
-                            <Button type="submit" onClick={() => alert("Not functional yet!")}>Save</Button>
+                            <Button type="submit" onClick={() => alert("Not functional yet!")}  className="bg-cyan-900">Save</Button>
                         </div>
 
                         <Label htmlFor="interestRate" className="mb-1">Interest Rate (%)</Label>                  
                         <div className="flex">
                             <Input type="number" id="interestRate" placeholder="Enter in %" className="text-lg mb-3" value={modelParams.interestRate} name="interestRate" onChange={handleUpdate}/>
-                            <Button type="submit">Save</Button>
+                            <Button type="submit"  className="bg-cyan-900">Save</Button>
                         </div>
 
                         <Label htmlFor="term" className="mb-1">Term (yrs)</Label>
                         <div className="flex">
                             <Input type="number" id="term" placeholder="Enter in years" className="text-lg mb-3" value={modelParams.term} name="term" onChange={handleUpdate}/>
-                            <Button type="submit">Save</Button>
+                            <Button type="submit"  className="bg-cyan-900">Save</Button>
                         </div>
 
                         <Label htmlFor="reinvestedInterst" className="mb-1">Contribution Each Month (%)</Label>
                         <div className="flex">
                             <Input type="number" id="reinvestedInterest" placeholder="Reinvested interest - %" className="text-lg mb-3" value={modelParams.reinvestedInterest} name="reinvestedInterest" onChange={handleUpdate}/>
-                            <Button type="submit">Save</Button>
+                            <Button type="submit" className="bg-cyan-900">Save</Button>
                         </div>
                     </div>
 
@@ -90,7 +90,7 @@ const StressTest1 = () => {
                     <div>
                         <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Output Summary</div>
                         <div>
-                            <p className="text-base">At Year 5: </p>
+                            <p className="text-base"><u>At Year 5: </u></p>
 
                             <p className="text-base">Value = <b className="text-indigo-900">{tableData.length >= 5 ? "$" + tableData[4].interestAndBalance.toFixed(2) + " (▲" + (((tableData[4].interestAndBalance - modelParams.presentValue) / modelParams.presentValue)*100).toFixed(2) + "%)" : "N/A (please specify a greater year)"}</b></p>
 
@@ -99,7 +99,7 @@ const StressTest1 = () => {
 
                         <br></br>
                         <div>
-                            <p className="text-base">At Year 30: </p>
+                            <p className="text-base"><u>At Year 30: </u></p>
 
                             <p className="text-base">Value = <b className="text-indigo-900">{tableData.length >= 30 ? "$" + tableData[29].interestAndBalance.toFixed(2) + " (▲" + (((tableData[29].interestAndBalance - modelParams.presentValue) / modelParams.presentValue)*100).toFixed(2) + "%)" : "N/A (please specify a greater year)"}</b></p>
 
@@ -126,8 +126,8 @@ const StressTest1 = () => {
                             <TableRow key={item.year} className="text-sm text-center">
                                 <TableCell>{item.year}</TableCell>
                                 <TableCell>${item.balance.toFixed(2)}</TableCell>
-                                <TableCell>${item.interestEarned.toFixed(2)}</TableCell>
-                                <TableCell>${item.interestAndBalance.toFixed(2)}</TableCell>
+                                <TableCell className="text-indigo-900"><b>${item.interestEarned.toFixed(2)}</b></TableCell>
+                                <TableCell className="text-amber-900"><b>${item.interestAndBalance.toFixed(2)}</b></TableCell>
                             </TableRow>
                             ))}
                         </TableBody>
