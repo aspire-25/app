@@ -1,21 +1,21 @@
 'use client'
 
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalculatedFinancialReportCollection, FinancialReportCollection, TransformedFinancialReportCollection } from "@/lib/fetch";
+import { CalculatedFinancialReportCollection, FinancialReportCollection, TransformedBalanceSheetCollection, TransformedFinancialReportCollection, TransformedIncomeStatementCollection } from "@/lib/fetch";
 import { calculateBalanceSheet, calculateIncomeStatement, getColumnLabel, transformCalculatedFinancialReportCollection } from "@/lib/financials";
 import { useEffect, useState } from "react";
 
 const ClientWrapper = () => {
-
-    const [financials, setFinancials] = useState<TransformedFinancialReportCollection | null>(null);
+    const [balanceSheet, setBalanceSheet] = useState<TransformedBalanceSheetCollection | null>(null);
+    const [incomeStatement, setIncomeStatement] = useState<TransformedIncomeStatementCollection | null>(null);
     const [years, setYears] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
             const RESPONSE = await fetch(`/api/financials`, {
-                method: 'GET',
-                cache: 'no-store'
+                method: 'GET'
             });
             const FINANCIALS = await RESPONSE.json();
             const DATA: FinancialReportCollection = FINANCIALS.data;
@@ -28,8 +28,9 @@ const ClientWrapper = () => {
                 };
             });
             setYears(Object.keys(CALCULATED_DATA));
-            setFinancials(transformCalculatedFinancialReportCollection(CALCULATED_DATA));
-            console.log(transformCalculatedFinancialReportCollection(CALCULATED_DATA));
+            const TRANSFORMED = transformCalculatedFinancialReportCollection(CALCULATED_DATA);
+            setBalanceSheet(TRANSFORMED.balance);
+            setIncomeStatement(TRANSFORMED.income);
         };
         fetchData();
     }, []);
@@ -44,31 +45,69 @@ const ClientWrapper = () => {
             </div>
 
             <TabsContent value="table">
-                {financials ? (
-                    <Table>
-                        <TableCaption>THIS IS THE END</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead></TableHead>
-                                {years.map((year) => (
-                                    <TableHead className="font-bold" key={year}>{year}</TableHead>
-                                ))}
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {Object.keys(financials).map((label) => {
-                                const key = label as keyof TransformedFinancialReportCollection;
-                                return (
-                                    <TableRow key={key}>
-                                        <TableCell><div className="font-bold">{getColumnLabel(label)}</div></TableCell>
-                                        {financials[key].map((item, index) => (
-                                            <TableCell key={index}>{item}</TableCell>
-                                        ))}
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
+                {balanceSheet && incomeStatement ? (
+                    <>
+                        <Card className="mb-5">
+                            <CardHeader>
+                                <CardTitle className="text-xl text-center">Income Statement</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead></TableHead>
+                                            {years.map((year) => (
+                                                <TableHead className="font-bold" key={year}>{year}</TableHead>
+                                            ))}
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {Object.keys(incomeStatement).map((label) => {
+                                            const key = label as keyof TransformedIncomeStatementCollection;
+                                            return (
+                                                <TableRow key={key}>
+                                                    <TableCell><div className="font-bold">{getColumnLabel(label)}</div></TableCell>
+                                                    {incomeStatement[key].map((item, index) => (
+                                                        <TableCell key={index}>{item}</TableCell>
+                                                    ))}
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-xl text-center">Balance Sheet</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead></TableHead>
+                                            {years.map((year) => (
+                                                <TableHead className="font-bold" key={year}>{year}</TableHead>
+                                            ))}
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {Object.keys(balanceSheet).map((label) => {
+                                            const key = label as keyof TransformedBalanceSheetCollection;
+                                            return (
+                                                <TableRow key={key}>
+                                                    <TableCell><div className="font-bold">{getColumnLabel(label)}</div></TableCell>
+                                                    {balanceSheet[key].map((item, index) => (
+                                                        <TableCell key={index}>{item}</TableCell>
+                                                    ))}
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </>
                 ) : (
                     <div className="grid auto-rows-min gap-4 md:grid-cols-1">
                         <div className="h-48 rounded-xl bg-muted/50" />

@@ -83,8 +83,17 @@ export type CalculatedIncomeStatement = {
 }
 
 export type TransformedFinancialReportCollection = {
-    [K in keyof CalculatedBalanceSheet | keyof CalculatedIncomeStatement]: 
-        (CalculatedBalanceSheet & CalculatedIncomeStatement)[K] extends number ? number[] : string[];
+    balance: TransformedBalanceSheetCollection;
+    income: TransformedIncomeStatementCollection;
+};
+export type TransformedBalanceSheetCollection = {
+    [K in keyof CalculatedBalanceSheet]: 
+        CalculatedBalanceSheet[K] extends number ? number[] : string[];
+};
+
+export type TransformedIncomeStatementCollection = {
+    [K in keyof CalculatedIncomeStatement]: 
+        CalculatedIncomeStatement[K] extends number ? number[] : string[];
 };
 
 export const fetchFinancials = async (): Promise<Record<number, FinancialReport>> => {
