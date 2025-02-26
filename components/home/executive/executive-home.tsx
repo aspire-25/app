@@ -46,7 +46,7 @@ const ExecutiveHome: React.FC = () => {
           ))}
         </div>
 
-        {/* Add Page button */}
+        {/* Overview Page button */}
         <div className="flex gap-2">
           <button className="px-4 py-2 border rounded bg-white hover:bg-blue-200" onClick={handleOverview}>Overview</button>
         </div>
