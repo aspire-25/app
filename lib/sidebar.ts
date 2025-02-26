@@ -45,8 +45,8 @@ const SIDEBAR_SECTIONS: SidebarMenuSection[] = [
             },
             {
                 title: "Statement Visualizer",
-                name: 'editor',
-                url: "/user/financials",
+                name: 'visualizer',
+                url: "/user/visualizer",
             },
             {
                 title: "Edit Income Statements",
