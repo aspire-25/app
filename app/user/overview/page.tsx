@@ -1,17 +1,26 @@
 'use client';
 
 import React, { useState } from "react";
+import {useRouter} from "next/navigation";
 
 const Overview: React.FC = () => {
   const [selectedOption1, setSelectedOption1] = useState("");
   const [selectedOption2, setSelectedOption2] = useState("");
+
+  const router = useRouter();
+  const handleBack = () => {
+    router.push('/components/executive');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-8 mt-[-200px]">
       <h1 className="text-3xl font-bold mb-2">Overview</h1>
       <div className="text-lg text-center mb-6">
         <p>(Will be able to view high-level trends over the years).</p>
-
+        {/* Back button */}
+        <div>
+          <button className="px-4 py-2 border rounded bg-white hover:bg-blue-200" onClick={handleBack}>Back</button>
+        </div>
         {/*Dropdown menus*/}
         <div className="flex space-x-4 items-center justify-center">
           <h3>From</h3>
