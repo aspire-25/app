@@ -55,8 +55,7 @@ const ExecutiveHome: React.FC = () => {
       <div className="mt-4 space-y-4">
         {[
           "Stress Test Results", //summary results from S1-S5
-          "Income Statement",
-          "Balance Sheet"
+          "Sustainability Model"
         ].map((title) => (
           <div
             key={title}
