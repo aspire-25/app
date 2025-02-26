@@ -5,9 +5,7 @@ import { useState } from "react"
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
-    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
@@ -24,7 +22,7 @@ const StressTest1 = () => {
 
     const [tableData, updateTableData] = useState<{ year: number, balance: number, interestEarned: number, interestAndBalance: number }[]>([])
 
-    const generateTableData = (presentValue: number, interestRate: number, term: number, reinvestedInterest: number) => {
+    const generateTableData = (presentValue: number, interestRate: number, term: number) => {
         const data = []
         let calculatedBalance = presentValue
         for (let i = 0; i < Number(term); i++) {
@@ -48,7 +46,7 @@ const StressTest1 = () => {
         const updatedParams = {...modelParams, [event.target.name] : event.target.value}
         updateModelParams(updatedParams);
 
-        const updatedTableData = generateTableData(updatedParams.presentValue, updatedParams.interestRate, updatedParams.term, updatedParams.reinvestedInterest)
+        const updatedTableData = generateTableData(updatedParams.presentValue, updatedParams.interestRate, updatedParams.term)
         updateTableData(updatedTableData)
 
     }

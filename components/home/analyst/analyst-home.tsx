@@ -16,7 +16,7 @@ const AnalystLanding = () => {
     return (
         <div className="m-5">
             {labels.map((item) => (
-                <Card className="shadow-sm rounded-xl mt-5 mb-5">
+                <Card key={item.title} className="shadow-sm rounded-xl mt-5 mb-5">
                     <CardContent className="p-4 flex justify-between items-center">
                         <div>
                             <h3 className="text-2xl font-bold">{item.title}</h3>

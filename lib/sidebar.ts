@@ -18,7 +18,7 @@ export type SidebarMenuSection = {
 
 const SIDEBAR_SECTIONS: SidebarMenuSection[] = [
     {
-        role: "all",
+        role: "disabled",
         title: "Home",
         url: "/user",
         icon: NotebookPen,
@@ -32,7 +32,7 @@ const SIDEBAR_SECTIONS: SidebarMenuSection[] = [
         ]
     },
     {
-        role: 'admin',
+        role: 'all',
         title: 'Auditor',
         url: '/user/financials',
         icon: NotebookPen,
@@ -40,6 +40,11 @@ const SIDEBAR_SECTIONS: SidebarMenuSection[] = [
         items: [
             {
                 title: "Statement Editor",
+                name: 'editor',
+                url: "/user/financials",
+            },
+            {
+                title: "Statement Visualizer",
                 name: 'editor',
                 url: "/user/financials",
             },
@@ -99,6 +104,6 @@ export const doesTabExist = (name: string): boolean => {
 
 export const getFilteredSidebarSections = (role: string): SidebarMenuSection[] => {
     return SIDEBAR_SECTIONS.filter(
-        (section) => section.role !== "all" && section.role === role
+        (section) => section.role === "all" || section.role === role
     );
 };
