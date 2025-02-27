@@ -16,6 +16,17 @@ const ExecutiveHome: React.FC = () => {
     "Scenario #5: Decrease bond return to 1.7% due to increase in inflation"
   ]
 
+  const [selectedOption1, setSelectedOption1] = useState("");
+  const [selectedOption2, setSelectedOption2] = useState("");
+
+  const optionsMap: Record<string, string[]> = {
+    "Income Statement": ["Net Sales", "Cost of goods sold", "Gross profit", "Gross margin %", "Total operating expenses", "Operating expenses %",
+      "Profit (loss) from operations %", "Total other income (expense) %", "Income (loss) before income taxes", "Pre-tax income %",
+      "Net income (loss)", "Net income (loss) %"],
+    "Balance Sheet": ["Total Current Assets", "Total long-term asset", "Total Assets", "Total Current Liabilities", "Total Long-term Liabilities",
+      "Total Liabilities", "Total Stockholder's Equity", "Total Liabilities and Equity"]
+  };
+
   const router = useRouter();
   const handleOverview = () => {
     router.push('/user/overview');
@@ -97,8 +108,37 @@ const ExecutiveHome: React.FC = () => {
             ))}
           </div>
         ) : (
+          /*Sustainability Model section*/
           <div className="p-4 border rounded bg-gray-100">
-            <p className="text-gray-600">📊 Sustainability Model Graph Placeholder</p>
+            <div className="flex space-x-4 items-center justify-center">
+              <h3>From</h3>
+              <select
+                className="p-2 border border-gray-300 rounded md"
+                value={selectedOption1}
+                onChange={(e) => {
+                  setSelectedOption1(e.target.value);
+                  setSelectedOption2(""); // Reset second dropdown when first changes
+                }}
+              >
+                <option value="">Select</option>
+                {Object.keys(optionsMap).map((key) => (
+                  <option key={key} value={key}>{key.replace("select", "")}</option>
+                ))}
+              </select>
+              <h3>View</h3>
+              <select
+                className="p-2 border border-gray-300 rounded-md"
+                value={selectedOption2}
+                onChange={(e) => setSelectedOption2(e.target.value)}
+                disabled={!selectedOption1}
+              >
+                <option value="">Select</option>
+                {selectedOption1 && optionsMap[selectedOption1].map((option, index) => (
+                  <option key={index} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+            <p className="flex items-center justify-center text-gray-600">📊 Sustainability Model Graph Placeholder</p>
           </div>
         )}
       </div>
