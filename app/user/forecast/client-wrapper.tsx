@@ -2,7 +2,7 @@
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalculatedFinancialReportCollection, FinancialReportCollection, TransformedFinancialReportCollection } from "@/lib/fetch";
+import { CalculatedFinancialReportCollection, FinancialReportCollection, TransformedFinancialReportCollection } from "@/lib/fetch";   
 import { calculateBalanceSheet, calculateIncomeStatement, getColumnLabel, transformCalculatedFinancialReportCollection } from "@/lib/financials";
 import { useEffect, useState } from "react";
 
@@ -11,7 +11,7 @@ const ClientWrapper = () => {
     const [financials, setFinancials] = useState<TransformedFinancialReportCollection | null>(null);
     const [years, setYears] = useState<string[]>([]);
     const [forecastTypes, setForecastTypes] = useState<{ [key: string]: 'average' | 'multiplier' }>({});
-    const [multipliers, setMultipliers] = useState<{ [key: string]: number }>({}); // State for individual multipliers
+    const [multipliers, setMultipliers] = useState<{ [key: string]: number }>({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,9 +29,11 @@ const ClientWrapper = () => {
                     balance: calculateBalanceSheet(DATA[year].balance),
                 };
             });
-            setYears(Object.keys(CALCULATED_DATA));
+
+            const existingYears = Object.keys(CALCULATED_DATA);
+            const newYears = Array.from({ length: 5 }, (_, i) => (2025 + i).toString());
+            setYears([...existingYears, ...newYears]); // Append new years
             setFinancials(transformCalculatedFinancialReportCollection(CALCULATED_DATA));
-            console.log(transformCalculatedFinancialReportCollection(CALCULATED_DATA));
         };
         fetchData();
     }, []);
@@ -56,9 +58,8 @@ const ClientWrapper = () => {
     return (
         <Tabs defaultValue="table">
             <div className="flex justify-between items-center mb-5">
-                <TabsList className="grid grid-cols-2 w-[400px]">
+                <TabsList className="grid grid-cols-1 w-[200px]">
                     <TabsTrigger value="table">Table</TabsTrigger>
-                    <TabsTrigger value="graph">Graph</TabsTrigger>
                 </TabsList>
             </div>
 
@@ -77,10 +78,20 @@ const ClientWrapper = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {Object.keys(financials).map((label) => {
+                            {Object.entries(financials).map(([label, values]) => {
                                 const key = label as keyof TransformedFinancialReportCollection;
-                                const currentForecastType = forecastTypes[label] || 'average'; // Default to 'average' if not set
-                                const currentMultiplier = multipliers[label] || 1.0; // Default multiplier is 1.0
+                                const currentForecastType = forecastTypes[label] || 'average'; 
+                                const currentMultiplier = multipliers[label] || 1.0;
+
+                                // Forecast values for additional years
+                                const extendedValues = [...(values as number[])];
+                                for (let i = 0; i < 5; i++) {
+                                    const lastIndex = extendedValues.length - 1;
+                                    const newValue = currentForecastType === 'average'
+                                        ? (extendedValues[0] + extendedValues.slice(-2).reduce((sum, v) => sum + v, 0) / 2) // AVERAGE formula
+                                        : extendedValues[lastIndex] + (extendedValues[lastIndex] * currentMultiplier); // MULTIPLIER formula
+                                    extendedValues.push(newValue);
+                                }
 
                                 return (
                                     <TableRow key={key}>
@@ -104,12 +115,15 @@ const ClientWrapper = () => {
                                                     min="0" step="any"
                                                 />
                                             ) : (
-                                                '1.0' // Default multiplier for "average" forecast type
+                                                '1.0'
                                             )}
                                         </TableCell>
                                         <TableCell><div className="font-bold">{getColumnLabel(label)}</div></TableCell>
-                                        {financials[key].map((item, index) => (
-                                            <TableCell key={index}>{item}</TableCell>
+                                        {extendedValues.map((item, index) => (
+                                            <TableCell key={index}>
+                                            {typeof item === "number" ? item.toFixed(2) : "N/A"}
+                                        </TableCell>
+                                        
                                         ))}
                                     </TableRow>
                                 );
@@ -117,9 +131,6 @@ const ClientWrapper = () => {
                         </TableBody>
                     </Table>
                 )}
-            </TabsContent>
-
-            <TabsContent value="graph">
             </TabsContent>
         </Tabs>
     );
