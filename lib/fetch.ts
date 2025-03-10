@@ -54,6 +54,10 @@ export type CalculatedFinancialReportCollection = {
     [year: string]: CalculatedFinancialReport;
 };
 
+export type FlattenedFinancialReport = {
+    year: string;
+} & CalculatedBalanceSheet & CalculatedIncomeStatement;
+
 export type CalculatedBalanceSheet = {
     totalCurrentAssets: number;
     totalLongTermAssets: number;

@@ -1,4 +1,12 @@
-import { BalanceSheet, CalculatedBalanceSheet, CalculatedFinancialReportCollection, CalculatedIncomeStatement, IncomeStatement, TransformedBalanceSheetCollection, TransformedFinancialReportCollection, TransformedIncomeStatementCollection } from "./fetch";
+import { BalanceSheet, CalculatedBalanceSheet, CalculatedFinancialReportCollection, CalculatedIncomeStatement, FlattenedFinancialReport, IncomeStatement, TransformedBalanceSheetCollection, TransformedFinancialReportCollection, TransformedIncomeStatementCollection } from "./fetch";
+
+export const flattenFinancialReportCollection = (data: CalculatedFinancialReportCollection): FlattenedFinancialReport[] => {
+    return Object.entries(data).map(([year, report]) => ({
+        year,
+        ...report.balance,
+        ...report.income
+    }));
+};
 
 export const calculateBalanceSheet = (data: BalanceSheet): CalculatedBalanceSheet => {
     const TOTAL_CURRENT_ASSETS = (data.cash || 0) + (data.accountReceivable || 0) + (data.inventory || 0);
@@ -109,7 +117,7 @@ export const getColumnLabel = (key: string) => {
 
 export const transformCalculatedFinancialReportCollection = (reports: CalculatedFinancialReportCollection): TransformedFinancialReportCollection => {
     const TRANSFORMED_BALANCE_SHEET = {} as TransformedBalanceSheetCollection;
-    const TRANSFORMED_INCOME_STATEMENT= {} as TransformedIncomeStatementCollection;
+    const TRANSFORMED_INCOME_STATEMENT = {} as TransformedIncomeStatementCollection;
 
     Object.values(reports).forEach((report) => {
         for (const key of Object.keys(report.balance) as Array<keyof CalculatedBalanceSheet>) {
@@ -119,7 +127,7 @@ export const transformCalculatedFinancialReportCollection = (reports: Calculated
 
         for (const key of Object.keys(report.income) as Array<keyof CalculatedIncomeStatement>) {
             if (!TRANSFORMED_INCOME_STATEMENT[key]) TRANSFORMED_INCOME_STATEMENT[key] = [];
-            
+
             if (typeof report.income[key] === "number") {
                 (TRANSFORMED_INCOME_STATEMENT[key] as number[]).push(report.income[key] as number);
             } else {
