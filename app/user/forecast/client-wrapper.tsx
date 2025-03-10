@@ -84,7 +84,7 @@ const ClientWrapper = () => {
                                 const currentMultiplier = multipliers[label] || 1.0;
 
                                 // Forecast values for additional years
-                                const extendedValues = [...(values as number[])];
+                                const extendedValues = Array.isArray(values) ? [...values] : [];
                                 for (let i = 0; i < 5; i++) {
                                     const lastIndex = extendedValues.length - 1;
                                     const newValue = currentForecastType === 'average'
