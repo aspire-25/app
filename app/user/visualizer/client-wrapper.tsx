@@ -3,13 +3,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalculatedFinancialReportCollection, FinancialReportCollection, TransformedBalanceSheetCollection, TransformedIncomeStatementCollection } from "@/lib/fetch";
-import { calculateBalanceSheet, calculateIncomeStatement, getColumnLabel, transformCalculatedFinancialReportCollection } from "@/lib/financials";
+import { CalculatedFinancialReportCollection, FinancialReportCollection, FlattenedFinancialReport, TransformedBalanceSheetCollection, TransformedIncomeStatementCollection } from "@/lib/fetch";
+import { calculateBalanceSheet, calculateIncomeStatement, flattenFinancialReportCollection, getColumnLabel, transformCalculatedFinancialReportCollection } from "@/lib/financials";
 import { useEffect, useState } from "react";
+import Chart from "./bar-chart";
 
 const ClientWrapper = () => {
     const [balanceSheet, setBalanceSheet] = useState<TransformedBalanceSheetCollection | null>(null);
     const [incomeStatement, setIncomeStatement] = useState<TransformedIncomeStatementCollection | null>(null);
+    const [graphData, setGraphData] = useState<FlattenedFinancialReport[] | null>(null);
     const [years, setYears] = useState<string[]>([]);
 
     useEffect(() => {
@@ -27,6 +29,7 @@ const ClientWrapper = () => {
                     balance: calculateBalanceSheet(DATA[year].balance),
                 };
             });
+            setGraphData(flattenFinancialReportCollection(CALCULATED_DATA));
             setYears(Object.keys(CALCULATED_DATA));
             const TRANSFORMED = transformCalculatedFinancialReportCollection(CALCULATED_DATA);
             setBalanceSheet(TRANSFORMED.balance);
@@ -118,6 +121,9 @@ const ClientWrapper = () => {
             </TabsContent>
 
             <TabsContent value="graph">
+                {graphData &&
+                    <Chart data={graphData} />
+                }
             </TabsContent>
         </Tabs>
     );
