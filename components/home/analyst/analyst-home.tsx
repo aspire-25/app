@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import StressTest1 from "./stress-test-1"
+import StressTest1 from "./stresstest1/stress-test-1"
 
 const AnalystLanding = () => {
     const labels = [
