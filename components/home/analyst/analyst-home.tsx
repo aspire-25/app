@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import StressTest1 from "./stresstest1/stress-test-1"
 import StressTest2 from "./stresstest2/stress-test-2"
+import StressTest3 from "./stresstest3/stress-test-3"
 
 const AnalystLanding = () => {
     const labels = [
@@ -35,6 +36,7 @@ const AnalystLanding = () => {
                         <br></br>
                         {(item.title == "Stress Test 1") && <StressTest1 />}
                         {(item.title == "Stress Test 2") && <StressTest2 />}
+                        {(item.title == "Stress Test 3") && <StressTest3 />}
                     </CardContent>
                 </Card>
             ))}

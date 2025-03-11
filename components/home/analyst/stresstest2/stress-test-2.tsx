@@ -23,10 +23,6 @@ const StressTest2 = () => {
     const [decreaseInRevenues, setDecreaseInRevenues] = useState(2.25)
     const [st1Output, setSt1Output] = useState<number[]>([153034, 155329, 157659, 160024, 162424, 164861, 167334, 169844, 172391, 174977, 177602, 180266])
 
-    const handleUpdate = (event : React.ChangeEvent<HTMLInputElement>) => {
-        // setDecreaseInRevenues(event.target.value)
-    }
-    
     return (
         <>
 
