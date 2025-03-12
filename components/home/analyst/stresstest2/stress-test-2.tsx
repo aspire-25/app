@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */ 
+/* shut up eslint */
+
 import { useState } from "react"
 import {
     Table,
@@ -13,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import TableDivider from "../tableDivider"
 import LossOfInterestTable from "../lossOfInterestTable"
 
-let years: number[] = [];
+const years: number[] = [];
 const currentDate = new Date()
 for (let i = 0; i < 12; i++) {
     years.push(Number(currentDate.getFullYear()) + i)

@@ -1,4 +1,3 @@
-import { useState } from "react"
 import {
     Table,
     TableBody,
@@ -14,13 +13,13 @@ interface ChildProps {
 
 const LossOfInterestTable: React.FC<ChildProps> = ({ principalData }) => {
 
-    let years: number[] = [];
+    const years: number[] = [];
     const currentDate = new Date()
     for (let i = 0; i < 12; i++) {
         years.push(Number(currentDate.getFullYear()) + i)
     }
     
-    let annualReturnRate = 6.02
+    const annualReturnRate = 6.02
 
     const computeColTotals = (colID: number) => {
         let sum = 0;
@@ -88,11 +87,9 @@ const LossOfInterestTable: React.FC<ChildProps> = ({ principalData }) => {
                         ))
                     ))}
                 </TableRow>
-                
             </TableBody>
         </Table>
     )
-    
 }
 
 export default LossOfInterestTable;

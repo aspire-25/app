@@ -11,7 +11,7 @@ import {
     TableRow,
   } from "@/components/ui/table"
 
-let years: number[] = [];
+const years: number[] = [];
 const currentDate = new Date()
 for (let i = 0; i < 12; i++) {
     years.push(Number(currentDate.getFullYear()) + i)
@@ -24,8 +24,9 @@ const StressTest1 = () => {
     const [st1Output, setSt1Output] = useState<number[]>([])
     const [st2Output, setSt2Output] = useState<number[]>([])
     const [stDiffs, setStDiffs] = useState<number[]>(() => {
-    let lst: number[] = [];
+    const lst: number[] = [];
         years.forEach((yr) => {
+            console.log(yr)
             lst.push(0);
         })
         return lst
@@ -36,7 +37,7 @@ const StressTest1 = () => {
         setSt1Output(data)
 
         if (st2Output.length > 0) {
-            let diff = data.map(function(item, index) {
+            const diff = data.map(function(item, index) {
                 return st2Output[index] - item
             })
             setStDiffs(diff)

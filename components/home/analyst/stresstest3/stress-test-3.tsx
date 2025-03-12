@@ -1,12 +1,4 @@
 import { useState } from "react"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-  } from "@/components/ui/table"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,7 +6,7 @@ import { Select, SelectContent, SelectTrigger, SelectGroup, SelectLabel, SelectI
 import TableDivider from "../tableDivider"
 import LossOfInterestTable from "../lossOfInterestTable"
 
-let years: number[] = [];
+const years: number[] = [];
 const currentDate = new Date()
 for (let i = 0; i < 12; i++) {
     years.push(Number(currentDate.getFullYear()) + i)
@@ -22,7 +14,7 @@ for (let i = 0; i < 12; i++) {
 
 const StressTest3 = () => {
     const [eventValue, setEventValue] = useState(50000)
-    const [year, setYear] = useState <Number> (() => {
+    const [year, setYear] = useState <number> (() => {
         const currDate = new Date()
         return currDate.getFullYear()
     })
@@ -41,7 +33,7 @@ const StressTest3 = () => {
                         <SelectGroup>
                         <SelectLabel>Year</SelectLabel>
                             {years.map((yr) => (
-                                <SelectItem value={yr.toString()}>{yr}</SelectItem>
+                                <SelectItem value={yr.toString()} key={yr}>{yr}</SelectItem>
                             ))}
                         </SelectGroup>
                     </SelectContent>
