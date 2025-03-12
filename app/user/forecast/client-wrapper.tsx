@@ -25,7 +25,10 @@ const ClientWrapper = () => {
 
             if (DATA) {
                 const sortedYears = Object.keys(DATA).map(Number).sort((a, b) => a - b);
-                setYears(sortedYears.map(String));
+                const latestYear = sortedYears[sortedYears.length - 1] || 2024; // Default to 2024 if no data
+                const extendedYears = [...sortedYears, ...Array.from({ length: 5 }, (_, i) => latestYear + i + 1)];
+
+                setYears(extendedYears.map(String));
 
                 const allBalanceSheets: Record<string, Record<string, number>> = {};
 
@@ -34,7 +37,6 @@ const ClientWrapper = () => {
     
                     allBalanceSheets[year] = Object.fromEntries(
                         Object.entries(balanceData)
-                        //.filter(([key, value]) => typeof value === "number") // Exclude non-numeric properties
                         .map(([key, value]) => [key, value ?? 0]) // Replace null with 0
                     );
                 });
@@ -90,31 +92,27 @@ const ClientWrapper = () => {
                                 const currentMultiplier = multipliers[label] || 1.0;
 
                                 // Get existing values for each year
-                                const existingValues = years.map(year => balanceSheets[year]?.[label] ?? 0);
+                                const existingValues = years.slice(0, years.length - 5).map(year => balanceSheets[year]?.[label] ?? 0);
 
                                 // Generate forecasted values
                                 const forecastedValues = [...existingValues];
                                 for (let i = 0; i < 5; i++) {
                                     const lastIndex = forecastedValues.length - 1;
-                                    const currentValue = forecastedValues[lastIndex]; // This represents the current value (e.g., I45)
+                                    const currentValue = forecastedValues[lastIndex]; // This represents the last known value
 
                                     let newValue: number;
     
                                     if (currentForecastType === 'average') {
-                                        // For "AVERAGE", calculate the average of the first value and the last two values
-                                        const previousValue = forecastedValues[0]; // This represents E45 (the first value)
-                                        const twoLastValues = forecastedValues.slice(-2); // These represent H45 and I45 (the last two values)
-        
-                                        newValue = (previousValue + twoLastValues.reduce((sum, v) => sum + v, 0)) / 3; // Average formula: (E45 + H45 + I45) / 3
+                                        // Take the last 3 years for the average calculation
+                                        const lastThreeValues = forecastedValues.slice(-3); // Get last 3 values
+                                        newValue = lastThreeValues.reduce((sum, v) => sum + v, 0) / lastThreeValues.length;
                                     } else {
-                                        // For "MULTIPLIER", calculate the new value using the formula: I45 + (I45 * G45)
-                                        const multiplier = multipliers[label] || 1.0; // You can get this multiplier from the state
-                                        newValue = currentValue + (currentValue * multiplier); // Multiplier formula: I45 + (I45 * G45)
+                                        // Apply multiplier formula
+                                        newValue = currentValue + (currentValue * currentMultiplier);
                                     }
     
                                     forecastedValues.push(newValue);
                                 }
-
 
                                 return (
                                     <TableRow key={label}>
