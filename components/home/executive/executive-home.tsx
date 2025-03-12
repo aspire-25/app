@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import {useRouter} from "next/navigation";
+import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label} from "recharts";
 
 const ExecutiveHome: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>("Stress Test Results");
@@ -20,16 +20,64 @@ const ExecutiveHome: React.FC = () => {
   const [selectedOption2, setSelectedOption2] = useState("");
 
   const optionsMap: Record<string, string[]> = {
-    "Income Statement": ["Net Sales", "Cost of goods sold", "Gross profit", "Gross margin %", "Total operating expenses", "Operating expenses %",
+    "Income Statement": ["Net Sales", "Cost of Goods Sold", "Gross margin %", "Total operating expenses", "Operating expenses %",
       "Profit (loss) from operations %", "Total other income (expense) %", "Income (loss) before income taxes", "Pre-tax income %",
       "Net income (loss)", "Net income (loss) %"],
     "Balance Sheet": ["Total Current Assets", "Total long-term asset", "Total Assets", "Total Current Liabilities", "Total Long-term Liabilities",
       "Total Liabilities", "Total Stockholder's Equity", "Total Liabilities and Equity"]
   };
 
-  const router = useRouter();
-  const handleOverview = () => {
-    router.push('/user/overview');
+  // Example data for different chart selections
+  const sampleData: Record<string, { year: string; value?: number; goodsSoldCost?: number }[]> = {
+    "Net Sales": [
+      { year: "2025", value: 153034 },
+      { year: "2026", value: 155329 },
+      { year: "2027", value: 157659 },
+      { year: "2028", value: 160024 },
+      { year: "2029", value: 162424 },
+      { year: "2030", value: 164861 }
+    ],
+    "Cost of Goods Sold": [
+      { year: "2025", goodsSoldCost: 53000, grossProfit: 99500 },
+      { year: "2026", goodsSoldCost: 54000, grossProfit: 100500 },
+      { year: "2027", goodsSoldCost: 55000, grossProfit: 102613 },
+      { year: "2028", goodsSoldCost: 56000, grossProfit: 105485 },
+      { year: "2029", goodsSoldCost: 57000, grossProfit: 107755 },
+      { year: "2030", goodsSoldCost: 58000, grossProfit: 108372 }
+    ],
+    "Total Current Assets": [
+      { year: "2025", value: 200 },
+      { year: "2026", value: 250 },
+      { year: "2027", value: 300 }
+    ],
+    "Stress Tests": [ //placeholder
+      { year: "2025", goodsSoldCost: 900, grossProfit: 846 },
+      { year: "2026", goodsSoldCost: 1892, grossProfit: 1666 },
+      { year: "2027", goodsSoldCost: 2982, grossProfit: 2395 },
+      { year: "2028", goodsSoldCost: 4180, grossProfit: 2959 },
+      { year: "2029", goodsSoldCost: 5491, grossProfit: 3266 },
+      { year: "2030", goodsSoldCost: 6926, grossProfit: 3221 }
+    ]
+  };
+
+  // Custom Tooltip Component
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const { goodsSoldCost, grossProfit } = payload[0].payload; // Get the data from the hovered point
+
+      // Calculate the difference
+      const difference = grossProfit - goodsSoldCost;
+
+      return (
+        <div className="custom-tooltip p-2 bg-white border border-gray-300 rounded shadow-lg">
+          <p><strong>Year: </strong>{label}</p>
+          <p><strong>Principal: </strong>${goodsSoldCost}</p>
+          <p><strong>Stress Effect: </strong>${grossProfit}</p>
+          <p><strong>Interest Lost: </strong>${difference}</p>
+        </div>
+      );
+    }
+    return null;
   };
 
   // Toggle function
@@ -69,11 +117,6 @@ const ExecutiveHome: React.FC = () => {
             </button>
           ))}
         </div>
-
-        {/* Overview Page button */}
-        <div className="flex gap-2">
-          <button className="px-4 py-2 border rounded bg-white hover:bg-blue-200" onClick={handleOverview}>Overview</button>
-        </div>
       </div>
 
       {/* Dynamic Content Based on Active Section */}
@@ -101,7 +144,26 @@ const ExecutiveHome: React.FC = () => {
                 {/*Graph Placeholder - only shows if toggle is on*/}
                 {isOn && (
                   <div className="mt-2 p-4 border rounded bg-gray-100">
-                    <p className="text-gray-600">📊 Graph Placeholder for Stress Test #{index + 1}</p>
+                    {/* <p className="text-gray-600">📊 Graph Placeholder for Stress Test #{index + 1}</p> */}
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart
+                        data={sampleData["Stress Tests"]} // Replace with actual data for the stress test
+                        margin={{ top: 20, right: 20, bottom: 30, left: 60 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="year" tickMargin={10}>
+                          <Label value="Year" offset={-30} position="insideBottom" />
+                        </XAxis>
+                        <YAxis tickMargin={10}>
+                          <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
+                        </YAxis>
+                        <Tooltip content={<CustomTooltip />} />
+                        {/* Render multiple lines for different stress test scenarios */}
+                        <Line type="monotone" dataKey="goodsSoldCost" stroke="#8884d8" strokeWidth={2} name="Principal"/>
+                        <Line type="monotone" dataKey="grossProfit" stroke="#82ca9d" strokeWidth={2} name="Stress Effect"/>
+                        {/* Add more lines later */}
+                      </LineChart>
+                    </ResponsiveContainer>
                   </div>
                 )}
               </div>
@@ -109,7 +171,7 @@ const ExecutiveHome: React.FC = () => {
           </div>
         ) : (
           /*Sustainability Model section*/
-          <div className="p-4 border rounded bg-gray-100">
+          <div className="p-5 border rounded bg-gray-100">
             <div className="flex space-x-4 items-center justify-center">
               <h3>From</h3>
               <select
@@ -122,7 +184,7 @@ const ExecutiveHome: React.FC = () => {
               >
                 <option value="">Select</option>
                 {Object.keys(optionsMap).map((key) => (
-                  <option key={key} value={key}>{key.replace("select", "")}</option>
+                  <option key={key} value={key}>{key}</option>
                 ))}
               </select>
               <h3>View</h3>
@@ -138,7 +200,33 @@ const ExecutiveHome: React.FC = () => {
                 ))}
               </select>
             </div>
-            <p className="flex items-center justify-center text-gray-600">📊 Sustainability Model Graph Placeholder</p>
+            <div className="flex items-center justify-center text-gray-600">
+              {selectedOption2 && sampleData[selectedOption2] ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={sampleData[selectedOption2]} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="year" tickMargin={10}>
+                      <Label value="Year" offset={-30} position="insideBottom" />
+                    </XAxis>
+                    <YAxis tickMargin={10}>
+                      <Label value="Value (in $)" offset={100} position="insideRight" angle={-90}/>
+                    </YAxis>
+                    <Tooltip />
+                    {/* Render different lines depending on selectedOption2 */}
+                    {selectedOption2 === "Cost of Goods Sold" ? (
+                      <>
+                        <Line type="monotone" dataKey="goodsSoldCost" stroke="#8884d8" strokeWidth={2} name="Cost of Goods Sold" />
+                        <Line type="monotone" dataKey="grossProfit" stroke="#82ca9d" strokeWidth={2} name="Gross Profit" />
+                      </>
+                    ) : (
+                      <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
+                    )}
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <p>📊 Select an option to view the graph</p>
+              )}
+            </div>
           </div>
         )}
       </div>
