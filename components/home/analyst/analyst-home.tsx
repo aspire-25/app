@@ -1,5 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import StressTest1 from "./stresstest1/stress-test-1"
 import StressTest2 from "./stresstest2/stress-test-2"
