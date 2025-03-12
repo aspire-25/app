@@ -2,13 +2,12 @@
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalculatedFinancialReportCollection, FinancialReportCollection, TransformedFinancialReportCollection } from "@/lib/fetch";   
-import { calculateBalanceSheet, calculateIncomeStatement, getColumnLabel, transformCalculatedFinancialReportCollection } from "@/lib/financials";
+import { FinancialReportCollection } from "@/lib/fetch";   
+import { getColumnLabel } from "@/lib/financials";
 import { useEffect, useState } from "react";
 
 const ClientWrapper = () => {
-
-    const [financials, setFinancials] = useState<TransformedFinancialReportCollection | null>(null);
+    const [balanceSheets, setBalanceSheets] = useState<Record<string, Record<string, number>>>({});
     const [years, setYears] = useState<string[]>([]);
     const [forecastTypes, setForecastTypes] = useState<{ [key: string]: 'average' | 'multiplier' }>({});
     const [multipliers, setMultipliers] = useState<{ [key: string]: number }>({});
@@ -22,18 +21,26 @@ const ClientWrapper = () => {
             const FINANCIALS = await RESPONSE.json();
             const DATA: FinancialReportCollection = FINANCIALS.data;
 
-            const CALCULATED_DATA: CalculatedFinancialReportCollection = {};
-            Object.keys(DATA).forEach((year) => {
-                CALCULATED_DATA[year] = {
-                    income: calculateIncomeStatement(DATA[year].income),
-                    balance: calculateBalanceSheet(DATA[year].balance),
-                };
-            });
+            console.log("Fetched Financial Data:", DATA); // Debugging
 
-            const existingYears = Object.keys(CALCULATED_DATA);
-            const newYears = Array.from({ length: 5 }, (_, i) => (2025 + i).toString());
-            setYears([...existingYears, ...newYears]); // Append new years
-            setFinancials(transformCalculatedFinancialReportCollection(CALCULATED_DATA));
+            if (DATA) {
+                const sortedYears = Object.keys(DATA).map(Number).sort((a, b) => a - b);
+                setYears(sortedYears.map(String));
+
+                const allBalanceSheets: Record<string, Record<string, number>> = {};
+
+                sortedYears.forEach(year => {
+                    const balanceData = DATA[year]?.balance || {};
+    
+                    allBalanceSheets[year] = Object.fromEntries(
+                        Object.entries(balanceData)
+                        //.filter(([key, value]) => typeof value === "number") // Exclude non-numeric properties
+                        .map(([key, value]) => [key, value ?? 0]) // Replace null with 0
+                    );
+                });
+
+                setBalanceSheets(allBalanceSheets);
+            }
         };
         fetchData();
     }, []);
@@ -64,9 +71,9 @@ const ClientWrapper = () => {
             </div>
 
             <TabsContent value="table">
-                {financials && (
+                {Object.keys(balanceSheets).length > 0 && (
                     <Table>
-                        <TableCaption>THIS IS THE END</TableCaption>
+                        <TableCaption>Balance Sheet Forecast</TableCaption>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Forecast Type</TableHead>
@@ -78,23 +85,39 @@ const ClientWrapper = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {Object.entries(financials).map(([label, values]) => {
-                                const key = label as keyof TransformedFinancialReportCollection;
+                            {Object.keys(balanceSheets[years[0]] || {}).map((label) => {
                                 const currentForecastType = forecastTypes[label] || 'average'; 
                                 const currentMultiplier = multipliers[label] || 1.0;
 
-                                // Forecast values for additional years
-                                const extendedValues = [...(values as number[])];
+                                // Get existing values for each year
+                                const existingValues = years.map(year => balanceSheets[year]?.[label] ?? 0);
+
+                                // Generate forecasted values
+                                const forecastedValues = [...existingValues];
                                 for (let i = 0; i < 5; i++) {
-                                    const lastIndex = extendedValues.length - 1;
-                                    const newValue = currentForecastType === 'average'
-                                        ? (extendedValues[0] + extendedValues.slice(-2).reduce((sum, v) => sum + v, 0) / 2) // AVERAGE formula
-                                        : extendedValues[lastIndex] + (extendedValues[lastIndex] * currentMultiplier); // MULTIPLIER formula
-                                    extendedValues.push(newValue);
+                                    const lastIndex = forecastedValues.length - 1;
+                                    const currentValue = forecastedValues[lastIndex]; // This represents the current value (e.g., I45)
+
+                                    let newValue: number;
+    
+                                    if (currentForecastType === 'average') {
+                                        // For "AVERAGE", calculate the average of the first value and the last two values
+                                        const previousValue = forecastedValues[0]; // This represents E45 (the first value)
+                                        const twoLastValues = forecastedValues.slice(-2); // These represent H45 and I45 (the last two values)
+        
+                                        newValue = (previousValue + twoLastValues.reduce((sum, v) => sum + v, 0)) / 3; // Average formula: (E45 + H45 + I45) / 3
+                                    } else {
+                                        // For "MULTIPLIER", calculate the new value using the formula: I45 + (I45 * G45)
+                                        const multiplier = multipliers[label] || 1.0; // You can get this multiplier from the state
+                                        newValue = currentValue + (currentValue * multiplier); // Multiplier formula: I45 + (I45 * G45)
+                                    }
+    
+                                    forecastedValues.push(newValue);
                                 }
 
+
                                 return (
-                                    <TableRow key={key}>
+                                    <TableRow key={label}>
                                         <TableCell>
                                             <select
                                                 value={currentForecastType}
@@ -119,11 +142,10 @@ const ClientWrapper = () => {
                                             )}
                                         </TableCell>
                                         <TableCell><div className="font-bold">{getColumnLabel(label)}</div></TableCell>
-                                        {extendedValues.map((item, index) => (
+                                        {forecastedValues.map((item, index) => (
                                             <TableCell key={index}>
-                                            {typeof item === "number" ? item.toFixed(2) : "N/A"}
-                                        </TableCell>
-                                        
+                                                {typeof item === "number" ? item.toFixed(2) : "N/A"}
+                                            </TableCell>
                                         ))}
                                     </TableRow>
                                 );
