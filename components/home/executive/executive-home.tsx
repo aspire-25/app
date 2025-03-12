@@ -28,7 +28,7 @@ const ExecutiveHome: React.FC = () => {
   };
 
   // Example data for different chart selections
-  const sampleData: Record<string, { year: string; value?: number; goodsSoldCost?: number }[]> = {
+  const sampleData: Record<string, { year: string; value?: number; goodsSoldCost?: number; grossProfit?: number }[]> = {
     "Net Sales": [
       { year: "2025", value: 153034 },
       { year: "2026", value: 155329 },
