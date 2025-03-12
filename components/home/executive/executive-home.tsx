@@ -63,7 +63,7 @@ const ExecutiveHome: React.FC = () => {
   };
 
   // Custom Tooltip Component
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: never) => {
     if (active && payload && payload.length) {
       const { goodsSoldCost, grossProfit } = payload[0].payload; // Get the data from the hovered point
 
