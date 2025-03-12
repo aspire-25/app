@@ -60,9 +60,16 @@ const StressTest1 = () => {
         <>
 
             {/* inputs for ST 1 */}
-            <StressTestInputs onParamsUpdate={sendToParent}/>
-            <TableDivider/>
-            <StressTestInputs onParamsUpdate={sendToParent2}/>
+            <div className="flex justify-start w-100">
+                <div className="w-[45%]">
+                    <StressTestInputs onParamsUpdate={sendToParent}/>
+                </div>
+                <div className="w-[45%] ml-[7.5%]">
+                    <StressTestInputs onParamsUpdate={sendToParent2}/>
+                </div>
+                
+            </div>
+            
             <TableDivider/>
 
             {/* summary table */}
