@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState } from "react";
+import React, { useState } from "react"; 
 import Image from "next/image";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label } from "recharts";
 
