@@ -224,7 +224,8 @@ const ExecutiveHome: React.FC = () => {
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <p>📊 Select an option to view the graph</p>
+                <p> Select an option to view the graph</p>
+              /*<p>📊 Select an option to view the graph</p>*/
               )}
             </div>
           </div>
