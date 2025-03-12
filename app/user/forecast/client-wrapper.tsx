@@ -96,6 +96,7 @@ const ClientWrapper = () => {
 
                                 // Generate forecasted values
                                 const forecastedValues = [...existingValues];
+
                                 for (let i = 0; i < 5; i++) {
                                     const lastIndex = forecastedValues.length - 1;
                                     const currentValue = forecastedValues[lastIndex]; // This represents the last known value

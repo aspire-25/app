@@ -1,12 +1,8 @@
 import ClientWrapper from "./client-wrapper";
 
-const Page = async ({ params }: { params: Promise<{ year: string | null }> }) => {
-    const YEAR = (await params).year;
-
+const Page = async () => {
     return (
-        <>
-            <ClientWrapper year={YEAR ? Number(YEAR) : null} />
-        </>
+        <ClientWrapper />
     );
 };
 
