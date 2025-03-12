@@ -1,4 +1,12 @@
-import { BalanceSheet, CalculatedBalanceSheet, CalculatedFinancialReportCollection, CalculatedIncomeStatement, IncomeStatement, TransformedFinancialReportCollection } from "./fetch";
+import { BalanceSheet, CalculatedBalanceSheet, CalculatedFinancialReportCollection, CalculatedIncomeStatement, FlattenedFinancialReport, IncomeStatement, TransformedBalanceSheetCollection, TransformedFinancialReportCollection, TransformedIncomeStatementCollection } from "./fetch";
+
+export const flattenFinancialReportCollection = (data: CalculatedFinancialReportCollection): FlattenedFinancialReport[] => {
+    return Object.entries(data).map(([year, report]) => ({
+        year,
+        ...report.balance,
+        ...report.income
+    }));
+};
 
 export const calculateBalanceSheet = (data: BalanceSheet): CalculatedBalanceSheet => {
     const TOTAL_CURRENT_ASSETS = (data.cash || 0) + (data.accountReceivable || 0) + (data.inventory || 0);
@@ -108,23 +116,27 @@ export const getColumnLabel = (key: string) => {
 };
 
 export const transformCalculatedFinancialReportCollection = (reports: CalculatedFinancialReportCollection): TransformedFinancialReportCollection => {
-    const TRANSFORMED = {} as TransformedFinancialReportCollection;
+    const TRANSFORMED_BALANCE_SHEET = {} as TransformedBalanceSheetCollection;
+    const TRANSFORMED_INCOME_STATEMENT = {} as TransformedIncomeStatementCollection;
 
     Object.values(reports).forEach((report) => {
         for (const key of Object.keys(report.balance) as Array<keyof CalculatedBalanceSheet>) {
-            if (!TRANSFORMED[key]) TRANSFORMED[key] = [];
-            (TRANSFORMED[key] as number[]).push(report.balance[key] as number);
+            if (!TRANSFORMED_BALANCE_SHEET[key]) TRANSFORMED_BALANCE_SHEET[key] = [];
+            (TRANSFORMED_BALANCE_SHEET[key] as number[]).push(report.balance[key] as number);
         }
 
         for (const key of Object.keys(report.income) as Array<keyof CalculatedIncomeStatement>) {
-            if (!TRANSFORMED[key]) TRANSFORMED[key] = [];
-            
+            if (!TRANSFORMED_INCOME_STATEMENT[key]) TRANSFORMED_INCOME_STATEMENT[key] = [];
+
             if (typeof report.income[key] === "number") {
-                (TRANSFORMED[key] as number[]).push(report.income[key] as number);
+                (TRANSFORMED_INCOME_STATEMENT[key] as number[]).push(report.income[key] as number);
             } else {
-                (TRANSFORMED[key] as string[]).push(report.income[key] as string);
+                (TRANSFORMED_INCOME_STATEMENT[key] as string[]).push(report.income[key] as string);
             }
         }
     });
-    return TRANSFORMED;
+    return {
+        balance: TRANSFORMED_BALANCE_SHEET,
+        income: TRANSFORMED_INCOME_STATEMENT
+    };
 }

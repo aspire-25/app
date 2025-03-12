@@ -11,16 +11,20 @@ import {
     TableRow,
   } from "@/components/ui/table"
 
-const StressTest1 = () => {
+type ChildProps = {
+    onParamsUpdate: (data: Array<number>) => void; // The function to send data back to the parent
+};
 
-    const [modelParams, updateModelParams] = useState({
+const StressTestInputs: React.FC<ChildProps> = ({ onParamsUpdate }) => {
+
+    /* ======= This function and object will be used to initialize state; thus it's put up here to make sure code is DRY. ======= */
+
+    const defaults = {
         presentValue: 50000,
         interestRate: 4.2,
         term: 30,
         reinvestedInterest: 100
-    })
-
-    const [tableData, updateTableData] = useState<{ year: number, balance: number, interestEarned: number, interestAndBalance: number }[]>([])
+    }
 
     const generateTableData = (presentValue: number, interestRate: number, term: number) => {
         const data = []
@@ -41,7 +45,29 @@ const StressTest1 = () => {
         return data
     }
 
+    /* ======= */
+
+    const [modelParams, updateModelParams] = useState({
+        presentValue: 50000,
+        interestRate: 4.2,
+        term: 30,
+        reinvestedInterest: 100
+    })
+
+    const [tableData, updateTableData] = useState<{ year: number, balance: number, interestEarned: number, interestAndBalance: number }[]>(() => {
+        // calculate the table data and assign it to state.
+
+        let defaultTableData: { year: number, balance: number, interestEarned: number, interestAndBalance: number }[] = []
+
+        defaultTableData = generateTableData(defaults.presentValue, defaults.interestRate, defaults.term)
+
+        // send default data to the parent component upon initialization
+        onParamsUpdate(defaultTableData.map(e => e.interestAndBalance))
+        return defaultTableData;
+    })
+
     const handleUpdate = (event : React.ChangeEvent<HTMLInputElement>) => {
+        // if the parameters values are NOT default, update the table data to reflect the change in parameters, and send the values to the parent.
         console.log("hey")
         const updatedParams = {...modelParams, [event.target.name] : Number(event.target.value)}
         updateModelParams(updatedParams);
@@ -49,6 +75,8 @@ const StressTest1 = () => {
         const updatedTableData = generateTableData(updatedParams.presentValue, updatedParams.interestRate, updatedParams.term)
         updateTableData(updatedTableData)
 
+        // send to parent
+        onParamsUpdate(updatedTableData.map(e => e.interestAndBalance))
     }
 
     return (
@@ -105,37 +133,35 @@ const StressTest1 = () => {
                         </div>
                     </div>
                 </div>
-
                 {/* for the chart */}
                 <div className="w-1/2">
                     <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Output Table</div>
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="text-base">
-                                <TableHead className="text-center">Year</TableHead>
-                                <TableHead className="text-center">Balance</TableHead>
-                                <TableHead className="text-center">Interest Earned</TableHead>
-                                <TableHead className="text-center">Interest Earned + Balance</TableHead>
-                            </TableRow>
-                        </TableHeader>
-
-                        <TableBody>
-                            {tableData.map((item) => (
-                            <TableRow key={item.year} className="text-sm text-center">
-                                <TableCell>{item.year}</TableCell>
-                                <TableCell>${item.balance.toFixed(2)}</TableCell>
-                                <TableCell className="text-indigo-900"><b>${item.interestEarned.toFixed(2)}</b></TableCell>
-                                <TableCell className="text-amber-900"><b>${item.interestAndBalance.toFixed(2)}</b></TableCell>
-                            </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-
+                    <div className="overflow-y-auto h-[70vh]" >
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="text-base">
+                                    <TableHead className="text-center">Year</TableHead>
+                                    <TableHead className="text-center">Balance</TableHead>
+                                    <TableHead className="text-center">Interest Earned</TableHead>
+                                    <TableHead className="text-center">Interest Earned + Balance</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {tableData.map((item) => (
+                                    <TableRow key={item.year} className="text-sm text-center">
+                                        <TableCell>{item.year}</TableCell>
+                                        <TableCell>${item.balance.toFixed(2)}</TableCell>
+                                        <TableCell className="text-indigo-900"><b>${item.interestEarned.toFixed(2)}</b></TableCell>
+                                        <TableCell className="text-amber-900"><b>${item.interestAndBalance.toFixed(2)}</b></TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
             </div>
-            
         </div>
     )
 }
 
-export default StressTest1
+export default StressTestInputs
