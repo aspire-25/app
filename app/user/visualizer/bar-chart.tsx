@@ -1,9 +1,9 @@
 "use client"
 
 import { Settings2 } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { FlattenedFinancialReport } from "@/lib/fetch"
 import { getColumnLabel } from "@/lib/financials"
 import { Button } from "@/components/ui/button"
@@ -59,10 +59,8 @@ const Chart = ({ data }: { data: FlattenedFinancialReport[] }) => {
 
     const getYearRange = (data: FlattenedFinancialReport[]) => {
         const years = data.map((entry) => entry.year).filter(Boolean);
-        console.log(years)
         const minYear = Math.min(...years.map(year => Number(year)));
         const maxYear = Math.max(...years.map(year => Number(year)));
-        console.log(years.map(year => Number(year)))
         return minYear === maxYear ? `${minYear}` : `${minYear} - ${maxYear}`;
     }
 
@@ -82,6 +80,12 @@ const Chart = ({ data }: { data: FlattenedFinancialReport[] }) => {
                             tickMargin={10}
                             axisLine={false}
                         />
+                        <YAxis
+                            tickLine={false}
+                            tickMargin={10}
+                            axisLine={false}
+                            width={50}
+                        />
                         <ChartTooltip
                             cursor={false}
                             content={<ChartTooltipContent indicator="dashed" />}
@@ -91,6 +95,7 @@ const Chart = ({ data }: { data: FlattenedFinancialReport[] }) => {
                                 <Bar dataKey={field} fill={textToHSL(field)} radius={4} key={field} />
                             ))
                         }
+                        <ChartLegend content={<ChartLegendContent />} />
                     </BarChart>
                 </ChartContainer>
             </CardContent>
