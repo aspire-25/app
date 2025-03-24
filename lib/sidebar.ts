@@ -57,20 +57,15 @@ const SIDEBAR_SECTIONS: SidebarMenuSection[] = [
     },
     {
         role: 'admin',
-        title: 'Test',
-        url: '/user/input-data',
+        title: 'Configuration',
+        url: '/user',
         icon: NotebookPen,
         isActive: true,
         items: [
             {
-                title: "Input Data",
-                name: 'input-data',
-                url: "/user/input-data",
-            },
-            {
-                title: "View Data",
-                name: 'view-data',
-                url: "/user/view-data",
+                title: "Manage User",
+                name: 'manage-user',
+                url: "/user/manage-user",
             }
         ]
     }

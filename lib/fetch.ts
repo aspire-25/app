@@ -2,6 +2,16 @@
 
 import { sql } from "@vercel/postgres";
 
+export type AppUser = {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    dateJoined: string;
+    role: string;
+    active: boolean;
+}
+
 export type BalanceSheet = {
     id: number | null;
     year: number | null;
@@ -206,4 +216,10 @@ export const deleteFinancials = async (year: number) => {
     const DELETE_INCOME_QUERY = `DELETE FROM "IncomeStatements" WHERE year = ${year};`;
     await sql.query(DELETE_BALANCE_QUERY);
     await sql.query(DELETE_INCOME_QUERY);
+}
+
+export const fetchUsers = async () => {
+    const QUERY = `SELECT * FROM "Users";`;
+    const RESULT = await sql.query(QUERY);
+    return RESULT.rows;
 }
