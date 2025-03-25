@@ -38,28 +38,33 @@ const StressTest2 = () => {
 
             {/* summary table */}
             <p className="font-bold text-indigo-600 text-2xl">⚠️ As of 3/11, these are dummy values. They are NOT linked to the FC page.</p><br/>
-            <Table>
-                <TableHeader>
-                    <TableRow className="text-base">
-                        <TableHead className="text-center">Year</TableHead>
-                        <TableHead className="text-center">Tot. revenues</TableHead>
-                        <TableHead className="text-center">🔽 in revenues</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {years.map((item, index) => (
-                    <TableRow key={item} className="text-sm text-center">
-                        <TableCell>{item}</TableCell>
-                        <TableCell>${st1Output[index]}</TableCell>
-                        <TableCell className="font-bold text-amber-900">${(st1Output[index]*(decreaseInRevenues/100)).toFixed(0)}</TableCell>
-                    </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+            <div className="w-1/2">
+                <Table>
+                    <TableHeader>
+                        <TableRow className="text-base">
+                            <TableHead className="text-center">Year</TableHead>
+                            <TableHead className="text-center">Tot. revenues</TableHead>
+                            <TableHead className="text-center">🔽 in revenues</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {years.map((item, index) => (
+                        <TableRow key={item} className="text-sm text-center">
+                            <TableCell>{item}</TableCell>
+                            <TableCell>${st1Output[index]}</TableCell>
+                            <TableCell className="font-bold text-amber-900">${(st1Output[index]*(decreaseInRevenues/100)).toFixed(0)}</TableCell>
+                        </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+
+                
+            </div>
 
             <TableDivider/>
-            <p className="font-bold text-red-600 text-2xl"> ⚠️ Ask: is the difference in formula for cell O47 for Stress Test 2 intentional?</p><br></br>
-            <LossOfInterestTable principalData={st1Output.map(e => e*(decreaseInRevenues/100))}/>
+                <p className="font-bold text-red-600 text-2xl"> ⚠️ Ask: is the difference in formula for cell O47 for Stress Test 2 intentional?</p><br></br>
+                <LossOfInterestTable principalData={st1Output.map(e => e*(decreaseInRevenues/100))}/>
+            
         </>
     )
 }
