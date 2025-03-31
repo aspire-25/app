@@ -1,5 +1,6 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppUser, fetchUsers } from "@/lib/fetch";
+import ClientWrapper from "./client-wrapper";
 
 const Page = async () => {
     const users: AppUser[] = await fetchUsers();
@@ -20,7 +21,7 @@ const Page = async () => {
     }
 
     return (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {users.map((user) => (
                 <Card key={user.id}>
                     <CardHeader>
@@ -36,6 +37,9 @@ const Page = async () => {
                         <div><b>Joined</b>: {new Date(user.dateJoined).toLocaleDateString()}</div>
                         <div><b>Status</b>: {user.active ? 'Active' : 'Inactive'}</div>
                     </CardContent>
+                    <CardFooter>
+                        <ClientWrapper user={user} />
+                    </CardFooter>
                 </Card>
             ))}
         </div>
