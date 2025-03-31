@@ -1,6 +1,7 @@
 'use server';
 
 import { sql } from "@vercel/postgres";
+import { revalidatePath } from "next/cache";
 
 export type AppUser = {
     id: number;
@@ -222,4 +223,16 @@ export const fetchUsers = async () => {
     const QUERY = `SELECT * FROM "Users";`;
     const RESULT = await sql.query(QUERY);
     return RESULT.rows;
+}
+
+export const toggleUserActive = async (id: number, active: boolean) => {
+    const QUERY = `UPDATE "Users" SET active = ${active} WHERE id = ${id};`;
+    await sql.query(QUERY);
+    revalidatePath('/user/manage-user');
+}
+
+export const updateRole = async (id: number, role: string) => {
+    const QUERY = `UPDATE "Users" SET role = '${role}' WHERE id = ${id};`;
+    await sql.query(QUERY);
+    revalidatePath('/user/manage-user');
 }
