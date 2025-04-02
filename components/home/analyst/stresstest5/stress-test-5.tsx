@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import StressTest5Input from "./stress-test-5-inputs"
+import StressTest5InputSLC from "./stress-test-5-inputs-SLC"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const labels = [{title: "Loan Calculator Tab 5a", val: "LCT5a"}, {title: "Loan Calculator Tab 5b", val: "LCT5b"}, {title: "Simple Loan Calculator 5a", val: "SLC5a"}, {title: "Simple Loan Calculator 5b", val: "SLC5b"}]
@@ -30,6 +31,8 @@ const StressTest5 = () => {
                                 {(item.val == "LCT5a") && <StressTest5Input onParamsUpdate={() => {}} version="A" intrDataFrom5b={B5Output}/>}
 
                                 {(item.val == "LCT5b") && <StressTest5Input onParamsUpdate={sendToParent} version="B" intrDataFrom5b={[]}/>}
+
+                                {(item.val == "SLC5a") && <StressTest5InputSLC />}
 
                             </TabsContent>
                         </>
