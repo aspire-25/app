@@ -13,19 +13,23 @@ import {
 
 type ChildProps = {
     onParamsUpdate: (data: Array<number>) => void; // The function to send data back to the parent
+    version: string
 };
 
-// const StressTest5Input: React.FC<ChildProps> = ({ onParamsUpdate }) => {}
-
-const StressTest5Input = () => {
+const StressTest5Input: React.FC<ChildProps> = ({ onParamsUpdate, version }) => {
 
     /* ======= This function and object will be used to initialize state; thus it's put up here to make sure code is DRY. ======= */
-
-    const defaults = {
+    let defaults = {
         presentValue: 5000,
-        interestRate: 6.0,
+        interestRate: -1,
         term: 30,
         reinvestedInterest: 100
+    }
+
+    if (version == "A") {
+        defaults.interestRate = 6.0
+    } else {
+        defaults.interestRate = 1.7
     }
 
     const generateTableData = (presentValue: number, interestRate: number, term: number, reinvestedInterest: number) => {
@@ -40,9 +44,9 @@ const StressTest5Input = () => {
             const loanPayment = 394
             const interestPayment = 25
 
-            const interestEarned = calculatedBalance * (interestRate / 100)
-            const interestAndBalance = calculatedBalance * (1 + (interestRate / 100))
-            const amtPaidToInvestor = interestEarned * ((100-reinvestedInterest)/100)
+            const interestEarned = (calculatedBalance * (interestRate / 100))
+            const interestAndBalance = (calculatedBalance * (1 + (interestRate / 100)))
+            const amtPaidToInvestor = (interestEarned * ((100-reinvestedInterest)/100))
             const prinPaidTowardLoan = 0-(interestEarned - loanPayment)
             const balancePayment = interestAndBalance - amtPaidToInvestor - loanPayment + interestPayment
 
@@ -58,7 +62,6 @@ const StressTest5Input = () => {
                 balancePayment: balancePayment,
                 prinPaidTowardLoan: prinPaidTowardLoan,
                 totalPaidOnLoan: 0
-
             })
         }
 
@@ -67,11 +70,25 @@ const StressTest5Input = () => {
 
     /* ======= */
 
-    const [modelParams, updateModelParams] = useState({
-        presentValue: 5000,
-        interestRate: 6,
-        term: 30,
-        reinvestedInterest: 100
+    const [modelParams, updateModelParams] = useState<{
+        presentValue: number,
+        interestRate: number,
+        term: number,
+        reinvestedInterest: number
+    }>(() => {
+        let defInterest = null
+        if (version == "A") {
+            defInterest = 6
+        } else {
+            defInterest = 1.7
+        }
+
+        return ({
+            presentValue: 5000,
+            interestRate: defInterest,
+            term: 30,
+            reinvestedInterest: 100
+        })
     })
 
     const [tableData, updateTableData] = useState<{ 
@@ -105,7 +122,9 @@ const StressTest5Input = () => {
         defaultTableData = generateTableData(defaults.presentValue, defaults.interestRate, defaults.term, defaults.reinvestedInterest)
 
         // send default data to the parent component upon initialization
-        // onParamsUpdate(defaultTableData.map(e => e.interestAndBalance))
+        if (version == "B") {
+            onParamsUpdate(defaultTableData.map(e => e.interestEarned))
+        }
         return defaultTableData;
     })
 
@@ -120,7 +139,9 @@ const StressTest5Input = () => {
         updateTableData(updatedTableData)
 
         // send to parent
-        // onParamsUpdate(updatedTableData.map(e => e.interestAndBalance))
+        if (version == "B") {
+            onParamsUpdate(updatedTableData.map(e => e.interestEarned))
+        }
     }
 
     return (
@@ -162,11 +183,20 @@ const StressTest5Input = () => {
                 <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Output Summary</div>
                 <div>
                     <p className="text-base">
-                        <b>At Yr 5:</b> <b className="text-indigo-900">{tableData.length >= 5 ? "$" + tableData[4].interestAndBalance.toFixed(2) + " (▲" + (((tableData[4].interestAndBalance - modelParams.presentValue) / modelParams.presentValue)*100).toFixed(2) + "%)" : "N/A (please specify a greater year)"}</b>, Interest Earned = <b className="text-amber-900">{tableData.length >= 5 ? "$" + (tableData[4].interestAndBalance - modelParams.presentValue).toFixed(2) : "N/A (please specify a greater year)"}</b>
+                        <b>At Yr 5:</b> Value = <b className="text-indigo-900">{tableData.length >= 5 ? "$" + Math.floor(tableData[4].newBalance) + " (Appreciation " + (((tableData[4].newBalance - modelParams.presentValue) / modelParams.presentValue)*100).toFixed(2) + "%)" : "N/A (please specify a greater year)"}</b>, Total interest earned = <b className="text-amber-900">{tableData.length >= 5 ? "$" + (tableData.slice(0, 5).reduce((total, item) => total + item.interestEarned, 0)).toFixed(2) : "N/A (please specify a greater year)"}</b>
                     </p>
                     <br></br>
                     <p className="text-base">
-                        <b>At Year 30:</b> Value = <b className="text-indigo-900">{tableData.length >= 30 ? "$" + tableData[29].interestAndBalance.toFixed(2) + " (▲" + (((tableData[29].interestAndBalance - modelParams.presentValue) / modelParams.presentValue)*100).toFixed(2) + "%)" : "N/A (please specify a greater year)"}</b>, Interest Earned = <b className="text-amber-900">{tableData.length >= 30 ? "$" + (tableData[29].interestAndBalance - modelParams.presentValue).toFixed(2) : "N/A (please specify a greater year)"}</b></p>
+                        <b>At Yr 30:</b> Value = <b className="text-indigo-900">{tableData.length >= 30 ? "$" + Math.floor(tableData[29].newBalance) + " (Appreciation " + (((tableData[29].newBalance - modelParams.presentValue) / modelParams.presentValue)*100).toFixed(2) + "%)" : "N/A (please specify a greater year)"}</b>, Total interest earned = <b className="text-amber-900">{tableData.length >= 29 ? "$" + (tableData.slice(0, 30).reduce((total, item) => total + item.interestEarned, 0)).toFixed(2) : "N/A (please specify a greater year)"}</b>
+                    </p>
+                    <br></br>
+                    <p className="text-base">
+                        <b>Total loan payment: </b><b className="text-indigo-900">${(tableData.reduce((total, item) => total + item.loanPayment, 0)).toFixed(2)}</b>
+                    </p>
+                    <br></br>
+                    <p className="text-base">
+                        <b>Total amount of principal paid towards loan: </b><b className="text-indigo-900">${(tableData.reduce((total, item) => total + item.prinPaidTowardLoan, 0)).toFixed(2)}</b>
+                    </p>
                 </div>
             </div>
 
@@ -193,9 +223,11 @@ const StressTest5Input = () => {
                                     // dumb TypeScript makes me put "item[rowKey as keyof typeof item]" instead of simply "item[rowKey]" 💀
 
                                     (rowKey == "year" ? (
-                                        <TableCell key={rowKey} className="text-base font-bold">{Math.round(item[rowKey as keyof typeof item])}</TableCell>
+                                        <TableCell key={rowKey} className="text-base font-bold">{Math.round(item.year)}</TableCell>
                                     ) : (
-                                        <TableCell key={rowKey}>${Math.round(item[rowKey as keyof typeof item])}</TableCell>
+                                        (Math.round(item[rowKey as keyof typeof item]) >= 0) ? 
+                                        (<TableCell key={rowKey}>${Math.round(item[rowKey as keyof typeof item])}</TableCell>) : 
+                                        (<TableCell key={rowKey} className="text-red-900">(${0-Math.round(item[rowKey as keyof typeof item])}) [neg]</TableCell>)
                                     ))
                                     
                                 ))}

@@ -3,7 +3,7 @@ import StressTest1 from "./stresstest1/stress-test-1"
 import StressTest2 from "./stresstest2/stress-test-2"
 import StressTest3 from "./stresstest3/stress-test-3"
 import StressTest4 from "./stresstest4/stress-test-4"
-import StressTest5Input from "./stresstest5/stress-test-5-inputs"
+import StressTest5 from "./stresstest5/stress-test-5"
 
 const AnalystLanding = () => {
     const labels = [
@@ -31,7 +31,7 @@ const AnalystLanding = () => {
                             {(item.title == "Stress Test 2") && <StressTest2 />}
                             {(item.title == "Stress Test 3") && <StressTest3 />}
                             {(item.title == "Stress Test 4") && <StressTest4 />}
-                            {(item.title == "Stress Test 5") && <StressTest5Input />}
+                            {(item.title == "Stress Test 5") && <StressTest5 />}
                         </TabsContent>
                     </>
                     
