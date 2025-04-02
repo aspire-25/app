@@ -3,6 +3,8 @@ import StressTest1 from "./stresstest1/stress-test-1"
 import StressTest2 from "./stresstest2/stress-test-2"
 import StressTest3 from "./stresstest3/stress-test-3"
 import StressTest4 from "./stresstest4/stress-test-4"
+import StressTest5 from "./stresstest5/stress-test-5"
+import TableDivider from "./tableDivider"
 
 const AnalystLanding = () => {
     const labels = [
@@ -11,18 +13,17 @@ const AnalystLanding = () => {
         {title: "Stress Test 3", val: "st3", description: "One-time &quot;X&quot; event of $50,000"},
         {title: "Stress Test 4", val: "st4",  description: "Increase 2.5% operating expenses each year"},
         {title: "Stress Test 5", val: "st5",  description: "Decrease bond return to 1.7% due to increase in inflation"},
-        {title: "Stress Test 5a", val: "st5a", description: "Simple loan calculator 1"},
-        {title: "Stress Test 5b", val: "st5b", description: "Simple loan calculator 2"}
     ]
     
     return (
         <div className="m-5">
             <Tabs defaultValue="st1" className="w-full h-auto">
-                <TabsList className="grid w-full h-auto grid-cols-7 text-xl">
+                <TabsList className="grid w-full h-auto grid-cols-5 text-xl">
                     {labels.map((item, index) => (
                         <TabsTrigger value={item.val} key={index} className="text-xl">{item.title}</TabsTrigger>
                     ))} 
                 </TabsList>
+                <TableDivider />
                 {labels.map((item, index) => (
                     <>
                         <TabsContent value={item.val} key={index}>
@@ -32,6 +33,7 @@ const AnalystLanding = () => {
                             {(item.title == "Stress Test 2") && <StressTest2 />}
                             {(item.title == "Stress Test 3") && <StressTest3 />}
                             {(item.title == "Stress Test 4") && <StressTest4 />}
+                            {(item.title == "Stress Test 5") && <StressTest5 />}
                         </TabsContent>
                     </>
                     
