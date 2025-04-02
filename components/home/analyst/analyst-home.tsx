@@ -4,6 +4,7 @@ import StressTest2 from "./stresstest2/stress-test-2"
 import StressTest3 from "./stresstest3/stress-test-3"
 import StressTest4 from "./stresstest4/stress-test-4"
 import StressTest5 from "./stresstest5/stress-test-5"
+import TableDivider from "./tableDivider"
 
 const AnalystLanding = () => {
     const labels = [
@@ -22,6 +23,7 @@ const AnalystLanding = () => {
                         <TabsTrigger value={item.val} key={index} className="text-xl">{item.title}</TabsTrigger>
                     ))} 
                 </TabsList>
+                <TableDivider />
                 {labels.map((item, index) => (
                     <>
                         <TabsContent value={item.val} key={index}>
