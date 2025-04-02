@@ -80,9 +80,9 @@ const ClientWrapper = () => {
     }
 
     return (
-        <Tabs defaultValue="table">
+        <Tabs defaultValue="incomeStatement">
             <div className="flex justify-between items-center mb-5">
-                <TabsList className="grid grid-cols-1 w-[200px]">
+                <TabsList className="flex flex-row space-x-4">
                     <TabsTrigger value="incomeStatement">Income Statement Forecast</TabsTrigger>
                     <TabsTrigger value="balanceSheet">Balance Sheet Forecast</TabsTrigger>
                 </TabsList>
