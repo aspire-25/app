@@ -24,7 +24,9 @@ const StressTest5InputSLC =() => {
         presentValue: 5000,
         interestRate: -1,
         term: 30,
-        reinvestedInterest: 100
+        loanStartDate: new Date(2025, 0, 30),
+        numPayments: 288,
+        monthlyPayment: 23.80,
     }
 
     const generateTableData = (presentValue: number, interestRate: number, term: number, reinvestedInterest: number) => {
@@ -39,7 +41,6 @@ const StressTest5InputSLC =() => {
 
             const loanPayment = 394
             const interestPayment = 25
-
 
             const interestEarned = (calculatedBalance * (interestRate / 100))
             const interestAndBalance = (calculatedBalance * (1 + (interestRate / 100)))
@@ -73,13 +74,17 @@ const StressTest5InputSLC =() => {
         presentValue: number,
         interestRate: number,
         term: number,
-        reinvestedInterest: number
+        loanStartDate: Date,
+        monthlyPayment: number,
+        numPayments: number
     }>(() => {
        return ({
             presentValue: 5000,
             interestRate: 0,
             term: 30,
-            reinvestedInterest: 100
+            loanStartDate: new Date(2025, 0, 30),
+            monthlyPayment: 23.80,
+            numPayments: 288
         })
     })
 
@@ -111,7 +116,7 @@ const StressTest5InputSLC =() => {
             prinPaidTowardLoan: number,
             totalPaidOnLoan: number }[] = []
 
-        defaultTableData = generateTableData(defaults.presentValue, defaults.interestRate, defaults.term, defaults.reinvestedInterest)
+        defaultTableData = generateTableData(defaults.presentValue, defaults.interestRate, defaults.term, 0)
 
         // send default data to the parent component upon initialization
         /*
@@ -124,11 +129,18 @@ const StressTest5InputSLC =() => {
 
     const handleUpdate = (event : React.ChangeEvent<HTMLInputElement>) => {
         // if the parameters values are NOT default, update the table data to reflect the change in parameters, and send the values to the parent.
-        const updatedParams = {...modelParams, [event.target.name] : Number(event.target.value)}
+        console.log(event.target.value)
+        let updatedParams
+        if (event.target.name == "loanStartDate") {
+            updatedParams = {...modelParams, [event.target.name] : new Date(event.target.value)}
+        } else {
+            updatedParams = {...modelParams, [event.target.name] : Number(event.target.value)}
+        }
+       
         console.log(updatedParams)
         updateModelParams(updatedParams);
 
-        const updatedTableData = generateTableData(updatedParams.presentValue, updatedParams.interestRate, updatedParams.term, updatedParams.reinvestedInterest)
+        const updatedTableData = generateTableData(updatedParams.presentValue, updatedParams.interestRate, updatedParams.term, 0)
         updateTableData(updatedTableData)
 
         // send to parent
@@ -166,15 +178,21 @@ const StressTest5InputSLC =() => {
                             <Button type="submit"  className="bg-cyan-900">Save</Button>
                         </div>
 
+                        <Label htmlFor="loanStartDate" className="mb-1">Loan Start Date</Label>
+                        <div className="flex">
+                            <Input type="date" id="loanStartDate" placeholder="" className="text-base mb-3" name="loanStartDate" onChange={handleUpdate}/>
+                            <Button type="submit"  className="bg-cyan-900">Save</Button>
+                        </div>
+
                         <Label htmlFor="monthlyPayment" className="mb-1">Monthly Payment ($)</Label>
                         <div className="flex">
-                            <Input type="number" id="monthlyPayment" placeholder="Monthly Payment ($)" className="text-base mb-3" value={modelParams.reinvestedInterest} name="monthlyPayment" onChange={handleUpdate}/>
+                            <Input type="number" id="monthlyPayment" placeholder="Monthly Payment ($)" className="text-base mb-3" value={modelParams.monthlyPayment} name="monthlyPayment" onChange={handleUpdate}/>
                             <Button type="submit" className="bg-cyan-900">Save</Button>
                         </div>
 
                         <Label htmlFor="numPayments" className="mb-1">Number of Payments</Label>
                         <div className="flex">
-                            <Input type="number" id="numPayments" placeholder="Monthly Payment ($)" className="text-base mb-3" value={modelParams.reinvestedInterest} name="numPayments" onChange={handleUpdate}/>
+                            <Input type="number" id="numPayments" placeholder="Monthly Payment ($)" className="text-base mb-3" value={modelParams.numPayments} name="numPayments" onChange={handleUpdate}/>
                             <Button type="submit" className="bg-cyan-900">Save</Button>
                         </div>
                     </div>
