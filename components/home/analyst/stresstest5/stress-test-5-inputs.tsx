@@ -20,7 +20,7 @@ type ChildProps = {
 const StressTest5Input: React.FC<ChildProps> = ({ onParamsUpdate, version, intrDataFrom5b }) => {
 
     /* ======= This function and object will be used to initialize state; thus it's put up here to make sure code is DRY. ======= */
-    let defaults = {
+    const defaults = {
         presentValue: 5000,
         interestRate: -1,
         term: 30,

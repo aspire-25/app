@@ -11,16 +11,16 @@ import {
     TableRow,
   } from "@/components/ui/table"
 
-type ChildProps = {
+/* type ChildProps = {
     onParamsUpdate: (data: Array<number>) => void; // The function to send data back to the parent
     version: string,
     intrDataFrom5b: Array<number>
-};
+}; */
 
 const StressTest5InputSLC =() => {
 
     /* ======= This function and object will be used to initialize state; thus it's put up here to make sure code is DRY. ======= */
-    let defaults = {
+    const defaults = {
         presentValue: 5000,
         interestRate: -1,
         term: 30,
@@ -37,8 +37,8 @@ const StressTest5InputSLC =() => {
 
             // these values are taken from Stress Test 5A. Need to link to backend.
 
-            let loanPayment = 394
-            let interestPayment = 25
+            const loanPayment = 394
+            const interestPayment = 25
 
 
             const interestEarned = (calculatedBalance * (interestRate / 100))
@@ -47,7 +47,7 @@ const StressTest5InputSLC =() => {
             const prinPaidTowardLoan = interestEarned - loanPayment
             const balancePayment = interestAndBalance - amtPaidToInvestor - loanPayment + interestPayment
 
-            let totalPaidOnLoan = 0
+            const totalPaidOnLoan = 0
 
             data.push({
                 year: i+1,
@@ -75,9 +75,7 @@ const StressTest5InputSLC =() => {
         term: number,
         reinvestedInterest: number
     }>(() => {
-        let defInterest = null
-
-        return ({
+       return ({
             presentValue: 5000,
             interestRate: 0,
             term: 30,
