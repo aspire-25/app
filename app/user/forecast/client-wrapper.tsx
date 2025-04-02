@@ -87,7 +87,7 @@ const ClientWrapper = () => {
                         <TableBody>
                             {Object.keys(balanceSheets[years[0]] || {}).map((label) => {
                                 const currentForecastType = forecastTypes[label] || 'average'; 
-                                const currentMultiplier = multipliers[label] || 1.0;
+                                const currentMultiplier = multipliers[label] !== undefined ? multipliers[label] : 1.5;
 
                                 // Get existing values for each year
                                 const existingValues = years.map(year => balanceSheets[year]?.[label] ?? 0);
@@ -97,20 +97,22 @@ const ClientWrapper = () => {
 
                                 for (let i = 0; i < 5; i++) {
                                     const lastIndex = forecastedValues.length - 1;
-                                    const currentValue = forecastedValues[lastIndex]; // This represents the current value (e.g., I45)
+                                    const prevValue = forecastedValues[lastIndex]; // This represents the current value (e.g., I45)
 
                                     let newValue: number;
     
                                     if (currentForecastType === 'average') {
-                                        // For "AVERAGE", calculate the average of the first value and the last two values
-                                        const previousValue = forecastedValues[0]; // This represents E45 (the first value)
-                                        const twoLastValues = forecastedValues.slice(-2); // These represent H45 and I45 (the last two values)
-        
-                                        newValue = (previousValue + twoLastValues.reduce((sum, v) => sum + v, 0)) / 3; // Average formula: (E45 + H45 + I45) / 3
+                                        // For "AVERAGE", calculate the average of the last three values
+                                        const lastThreeValues = forecastedValues.slice(-3); // Get the last three values
+                                        
+                                        if (lastThreeValues.length === 3) {
+                                            newValue = Math.round(lastThreeValues.reduce((sum, v) => sum + v, 0) / 3); // Round the average normally
+                                        } else {
+                                            newValue = Math.round(prevValue || 0); //default to last value
+                                        }
                                     } else {
-                                        // For "MULTIPLIER", calculate the new value using the formula: I45 + (I45 * G45)
-                                        const multiplier = multipliers[label] || 1.0; // You can get this multiplier from the state
-                                        newValue = currentValue + (currentValue * multiplier); // Multiplier formula: I45 + (I45 * G45)
+                                        // For "MULTIPLIER", calculate the new value using the updated formula: a + (a * multiplier)
+                                        newValue = Math.round(prevValue + (prevValue * (currentMultiplier/100))); // Updated calculation
                                     }
     
                                     forecastedValues.push(newValue);
