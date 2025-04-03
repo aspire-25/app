@@ -4,14 +4,16 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Layout({
     children
 }: {
     children: React.ReactNode;
 }) {
-    const session = await auth();
+    const SESSION = await auth();
 
-    if (!session?.user) {
+    if (!SESSION?.user) {
         redirect('/');
     }
 
@@ -30,8 +32,8 @@ export default async function Layout({
                             </BreadcrumbItem>
                             <BreadcrumbSeparator className="hidden md:block" />
                             <BreadcrumbItem>
-                                <BreadcrumbLink href={'/user/financials'}>
-                                    Statement Editor
+                                <BreadcrumbLink href={'/user/visualizer'}>
+                                    Statement Visualizer
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                         </BreadcrumbList>

@@ -1,17 +1,19 @@
-// import { auth } from "@/auth";
 import { auth } from "@/auth";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 export default async function Layout({
     children
 }: {
     children: React.ReactNode;
 }) {
-    const session = await auth();
-    if (!session?.user) {
+    const SESSION = await auth();
+
+    if (!SESSION?.user) {
         redirect('/');
     }
 
@@ -30,8 +32,8 @@ export default async function Layout({
                             </BreadcrumbItem>
                             <BreadcrumbSeparator className="hidden md:block" />
                             <BreadcrumbItem>
-                                <BreadcrumbLink href={'/user/auditor'}>
-                                    Income Statements
+                                <BreadcrumbLink href={'/user/manage-user'}>
+                                    Manage User
                                 </BreadcrumbLink>
                             </BreadcrumbItem>
                         </BreadcrumbList>

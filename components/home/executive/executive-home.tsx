@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client';
 
-import React, { useState } from "react";
+import React, { useState } from "react"; 
 import Image from "next/image";
-import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label} from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label } from "recharts";
 
 const ExecutiveHome: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>("Stress Test Results");
@@ -61,7 +63,8 @@ const ExecutiveHome: React.FC = () => {
   };
 
   // Custom Tooltip Component
-  const CustomTooltip = ({ active, payload, label }: never) => {
+  // Custom Tooltip Component
+  const CustomTooltip: React.FC<{ active?: boolean; payload?: any[]; label?: string }> = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const { goodsSoldCost, grossProfit } = payload[0].payload; // Get the data from the hovered point
 
@@ -79,6 +82,7 @@ const ExecutiveHome: React.FC = () => {
     }
     return null;
   };
+
 
   // Toggle function
   const toggleSwitch = (index: number) => {
@@ -159,8 +163,8 @@ const ExecutiveHome: React.FC = () => {
                         </YAxis>
                         <Tooltip content={<CustomTooltip />} />
                         {/* Render multiple lines for different stress test scenarios */}
-                        <Line type="monotone" dataKey="goodsSoldCost" stroke="#8884d8" strokeWidth={2} name="Principal"/>
-                        <Line type="monotone" dataKey="grossProfit" stroke="#82ca9d" strokeWidth={2} name="Stress Effect"/>
+                        <Line type="monotone" dataKey="goodsSoldCost" stroke="#8884d8" strokeWidth={2} name="Principal" />
+                        <Line type="monotone" dataKey="grossProfit" stroke="#82ca9d" strokeWidth={2} name="Stress Effect" />
                         {/* Add more lines later */}
                       </LineChart>
                     </ResponsiveContainer>
@@ -209,7 +213,7 @@ const ExecutiveHome: React.FC = () => {
                       <Label value="Year" offset={-30} position="insideBottom" />
                     </XAxis>
                     <YAxis tickMargin={10}>
-                      <Label value="Value (in $)" offset={100} position="insideRight" angle={-90}/>
+                      <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
                     </YAxis>
                     <Tooltip />
                     {/* Render different lines depending on selectedOption2 */}
@@ -225,7 +229,7 @@ const ExecutiveHome: React.FC = () => {
                 </ResponsiveContainer>
               ) : (
                 <p> Select an option to view the graph</p>
-              /*<p>📊 Select an option to view the graph</p>*/
+                /*<p>📊 Select an option to view the graph</p>*/
               )}
             </div>
           </div>
