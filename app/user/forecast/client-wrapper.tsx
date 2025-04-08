@@ -62,9 +62,29 @@ const ClientWrapper = () => {
         }));
     };
 
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
     const handleMultiplierChange = (label: string, value: string) => {
         const numericValue = parseFloat(value);
-        if (!isNaN(numericValue)) {
+        
+        // Validate the multiplier value
+        let error = '';
+        if (isNaN(numericValue)) {
+            error = 'Please enter a valid number';
+        } else if (numericValue < -100) {
+            error = 'Multiplier cannot be less than -100%';
+        } else if (numericValue > 1000) {
+            error = 'Multiplier cannot exceed 1000%';
+        }
+        
+        // Update validation errors
+        setValidationErrors(prev => ({
+            ...prev,
+            [label]: error
+        }));
+        
+        // Only update if there's no error
+        if (!error && !isNaN(numericValue)) {
             setMultipliers((prevState) => ({
                 ...prevState,
                 [label]: numericValue,
@@ -151,13 +171,18 @@ const ClientWrapper = () => {
                                         </TableCell>
                                         <TableCell>
                                             {currentForecastType === 'multiplier' ? (
-                                                <input
-                                                    type="number"
-                                                    value={currentMultiplier}
-                                                    onChange={(e) => handleMultiplierChange(label, e.target.value)}
-                                                    className="w-full p-1 border rounded"
-                                                    min="0" step="any"
-                                                />
+                                                <div>
+                                                    <input
+                                                        type="number"
+                                                        value={currentMultiplier}
+                                                        onChange={(e) => handleMultiplierChange(label, e.target.value)}
+                                                        className={`w-full p-1 border rounded ${validationErrors[label] ? 'border-red-500' : ''}`}
+                                                        min="-100" max="1000" step="any"
+                                                    />
+                                                    {validationErrors[label] && (
+                                                        <p className="text-red-500 text-xs mt-1">{validationErrors[label]}</p>
+                                                    )}
+                                                </div>
                                             ) : (
                                                 '1.0'
                                             )}
@@ -239,13 +264,18 @@ const ClientWrapper = () => {
                                         </TableCell>
                                         <TableCell>
                                             {currentForecastType === 'multiplier' ? (
-                                                <input
-                                                    type="number"
-                                                    value={currentMultiplier}
-                                                    onChange={(e) => handleMultiplierChange(label, e.target.value)}
-                                                    className="w-full p-1 border rounded"
-                                                    min="0" step="any"
-                                                />
+                                                <div>
+                                                    <input
+                                                        type="number"
+                                                        value={currentMultiplier}
+                                                        onChange={(e) => handleMultiplierChange(label, e.target.value)}
+                                                        className={`w-full p-1 border rounded ${validationErrors[label] ? 'border-red-500' : ''}`}
+                                                        min="-100" max="1000" step="any"
+                                                    />
+                                                    {validationErrors[label] && (
+                                                        <p className="text-red-500 text-xs mt-1">{validationErrors[label]}</p>
+                                                    )}
+                                                </div>
                                             ) : (
                                                 '1.0'
                                             )}

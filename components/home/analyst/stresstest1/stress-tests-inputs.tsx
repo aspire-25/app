@@ -53,6 +53,8 @@ const StressTestInputs: React.FC<ChildProps> = ({ onParamsUpdate }) => {
         term: 30,
         reinvestedInterest: 100
     })
+    
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
     const [tableData, updateTableData] = useState<{ year: number, balance: number, interestEarned: number, interestAndBalance: number }[]>(() => {
         // calculate the table data and assign it to state.
@@ -66,17 +68,66 @@ const StressTestInputs: React.FC<ChildProps> = ({ onParamsUpdate }) => {
         return defaultTableData;
     })
 
-    const handleUpdate = (event : React.ChangeEvent<HTMLInputElement>) => {
-        // if the parameters values are NOT default, update the table data to reflect the change in parameters, and send the values to the parent.
-        console.log("hey")
-        const updatedParams = {...modelParams, [event.target.name] : Number(event.target.value)}
-        updateModelParams(updatedParams);
+    const validateField = (name: string, value: number): string => {
+        // Validation rules
+        switch (name) {
+            case 'presentValue':
+                if (value <= 0) return 'Present value must be greater than 0';
+                if (value > 1000000000) return 'Present value is too large';
+                break;
+            case 'interestRate':
+                if (value < 0) return 'Interest rate cannot be negative';
+                if (value > 100) return 'Interest rate cannot exceed 100%';
+                break;
+            case 'term':
+                if (value <= 0) return 'Term must be greater than 0';
+                if (value > 100) return 'Term cannot exceed 100 years';
+                break;
+            case 'reinvestedInterest':
+                if (value < 0) return 'Reinvested interest cannot be negative';
+                if (value > 100) return 'Reinvested interest cannot exceed 100%';
+                break;
+        }
+        return '';
+    }
 
-        const updatedTableData = generateTableData(updatedParams.presentValue, updatedParams.interestRate, updatedParams.term)
-        updateTableData(updatedTableData)
-
-        // send to parent
-        onParamsUpdate(updatedTableData.map(e => e.interestAndBalance))
+    const handleUpdate = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        const numValue = Number(value);
+        
+        // Validate the input
+        const error = validateField(name, numValue);
+        
+        // Update validation errors
+        setValidationErrors(prev => ({
+            ...prev,
+            [name]: error
+        }));
+        
+        // Only update if there's no error
+        if (!error) {
+            const updatedParams = { ...modelParams, [name]: numValue };
+            updateModelParams(updatedParams);
+            
+            try {
+                const updatedTableData = generateTableData(
+                    updatedParams.presentValue, 
+                    updatedParams.interestRate, 
+                    updatedParams.term
+                );
+                updateTableData(updatedTableData);
+                
+                // Send to parent
+                onParamsUpdate(updatedTableData.map(e => e.interestAndBalance));
+            } catch (err) {
+                console.error("Error calculating table data:", err);
+                // Handle calculation errors
+                setValidationErrors(prev => ({
+                    ...prev,
+                    calculation: "Error calculating results. Please check your inputs."
+                }));
+            }
+        }
     }
 
     return (
@@ -88,27 +139,77 @@ const StressTestInputs: React.FC<ChildProps> = ({ onParamsUpdate }) => {
                 <div className="w-3/5">
                     <Label htmlFor="presentValue" className="mb-1">Present Value ($)</Label>
                     <div className="flex">
-                        <Input type="number" id="presentValue" placeholder="" className="text-base mb-3" onChange={handleUpdate} value={modelParams.presentValue} name="presentValue"/>
-                        <Button type="submit" onClick={() => alert("Not functional yet!")}  className="bg-cyan-900">Save</Button>
+                        <Input 
+                            type="number" 
+                            id="presentValue" 
+                            placeholder="" 
+                            className={`text-base mb-1 ${validationErrors.presentValue ? 'border-red-500' : ''}`} 
+                            onChange={handleUpdate} 
+                            value={modelParams.presentValue} 
+                            name="presentValue"
+                        />
+                        <Button type="submit" onClick={() => alert("Not functional yet!")} className="bg-cyan-900">Save</Button>
                     </div>
+                    {validationErrors.presentValue && (
+                        <p className="text-red-500 text-xs mb-2">{validationErrors.presentValue}</p>
+                    )}
 
                     <Label htmlFor="interestRate" className="mb-1">Interest Rate (%)</Label>                  
                     <div className="flex">
-                        <Input type="number" id="interestRate" placeholder="Enter in %" className="text-base mb-3" value={modelParams.interestRate} name="interestRate" onChange={handleUpdate}/>
-                        <Button type="submit"  className="bg-cyan-900">Save</Button>
+                        <Input 
+                            type="number" 
+                            id="interestRate" 
+                            placeholder="Enter in %" 
+                            className={`text-base mb-1 ${validationErrors.interestRate ? 'border-red-500' : ''}`} 
+                            value={modelParams.interestRate} 
+                            name="interestRate" 
+                            onChange={handleUpdate}
+                        />
+                        <Button type="submit" className="bg-cyan-900">Save</Button>
                     </div>
+                    {validationErrors.interestRate && (
+                        <p className="text-red-500 text-xs mb-2">{validationErrors.interestRate}</p>
+                    )}
 
                     <Label htmlFor="term" className="mb-1">Term (yrs)</Label>
                     <div className="flex">
-                        <Input type="number" id="term" placeholder="Enter in years" className="text-base mb-3" value={modelParams.term} name="term" onChange={handleUpdate}/>
-                        <Button type="submit"  className="bg-cyan-900">Save</Button>
-                    </div>
-
-                    <Label htmlFor="reinvestedInterst" className="mb-1">Contribution Each Month (%)</Label>
-                    <div className="flex">
-                        <Input type="number" id="reinvestedInterest" placeholder="Reinvested interest - %" className="text-base mb-3" value={modelParams.reinvestedInterest} name="reinvestedInterest" onChange={handleUpdate}/>
+                        <Input 
+                            type="number" 
+                            id="term" 
+                            placeholder="Enter in years" 
+                            className={`text-base mb-1 ${validationErrors.term ? 'border-red-500' : ''}`} 
+                            value={modelParams.term} 
+                            name="term" 
+                            onChange={handleUpdate}
+                        />
                         <Button type="submit" className="bg-cyan-900">Save</Button>
                     </div>
+                    {validationErrors.term && (
+                        <p className="text-red-500 text-xs mb-2">{validationErrors.term}</p>
+                    )}
+
+                    <Label htmlFor="reinvestedInterest" className="mb-1">Contribution Each Month (%)</Label>
+                    <div className="flex">
+                        <Input 
+                            type="number" 
+                            id="reinvestedInterest" 
+                            placeholder="Reinvested interest - %" 
+                            className={`text-base mb-1 ${validationErrors.reinvestedInterest ? 'border-red-500' : ''}`} 
+                            value={modelParams.reinvestedInterest} 
+                            name="reinvestedInterest" 
+                            onChange={handleUpdate}
+                        />
+                        <Button type="submit" className="bg-cyan-900">Save</Button>
+                    </div>
+                    {validationErrors.reinvestedInterest && (
+                        <p className="text-red-500 text-xs mb-2">{validationErrors.reinvestedInterest}</p>
+                    )}
+                    
+                    {validationErrors.calculation && (
+                        <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+                            {validationErrors.calculation}
+                        </div>
+                    )}
                 </div>
             </div>
 
