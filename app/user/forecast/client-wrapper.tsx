@@ -1,10 +1,11 @@
 'use client'
-
+//npm install recharts
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FinancialReportCollection } from "@/lib/fetch";   
 import { getColumnLabel } from "@/lib/financials";
 import { useEffect, useState } from "react";
+import { LineChart, Line, XAxis, YAxis, Tooltip} from "recharts";
 
 const ClientWrapper = () => {
     const [incomeStatements, setIncomeStatements] = useState<Record<string, Record<string, number>>>({});
@@ -12,6 +13,7 @@ const ClientWrapper = () => {
     const [years, setYears] = useState<string[]>([]);
     const [forecastTypes, setForecastTypes] = useState<{ [key: string]: 'average' | 'multiplier' }>({});
     const [multipliers, setMultipliers] = useState<{ [key: string]: number }>({});
+    const [visibleCharts, setVisibleCharts] = useState<{ [label: string]: boolean }>({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -21,8 +23,6 @@ const ClientWrapper = () => {
             });
             const FINANCIALS = await RESPONSE.json();
             const DATA: FinancialReportCollection = FINANCIALS.data;
-
-            console.log("Fetched Financial Data:", DATA); // Debugging
 
             if (DATA) {
                 const sortedYears = Object.keys(DATA).map(Number).sort((a, b) => a - b);
@@ -34,17 +34,13 @@ const ClientWrapper = () => {
                 sortedYears.forEach(year => {
                     const balanceData = DATA[year]?.balance || {};
                     const incomeData = DATA[year]?.income || {};
-    
+
                     allBalanceSheets[year] = Object.fromEntries(
-                        Object.entries(balanceData)
-                        //.filter(([key, value]) => typeof value === "number") // Exclude non-numeric properties
-                        .map(([key, value]) => [key, value ?? 0]) 
+                        Object.entries(balanceData).map(([key, value]) => [key, value ?? 0])
                     );
 
                     allIncomeStatements[year] = Object.fromEntries(
-                        Object.entries(incomeData)
-                        //.filter(([key, value]) => typeof value === "number") // Exclude non-numeric properties
-                        .map(([key, value]) => [key, value ?? 0]) 
+                        Object.entries(incomeData).map(([key, value]) => [key, value ?? 0])
                     );
                 });
 
@@ -72,12 +68,106 @@ const ClientWrapper = () => {
         }
     };
 
-    // Generate forecast years starting from the latest year
+    const toggleChart = (label: string) => {
+        setVisibleCharts(prev => ({
+            ...prev,
+            [label]: !prev[label]
+        }));
+    };
+
     const extendedYears = [...years];
     const latestYear = parseInt(years[years.length - 1], 10);
     for (let i = 0; i < 5; i++) {
         extendedYears.push((latestYear + 1 + i).toString());
     }
+
+    const renderRows = (data: Record<string, Record<string, number>>) =>
+        Object.keys(data[years[0]] || {}).map((label) => {
+            const currentForecastType = forecastTypes[label] || 'average';
+            const currentMultiplier = multipliers[label] !== undefined ? multipliers[label] : 1.5;
+
+            const existingValues = years.map(year => data[year]?.[label] ?? 0);
+            const forecastedValues = [...existingValues];
+
+            for (let i = 0; i < 5; i++) {
+                const lastIndex = forecastedValues.length - 1;
+                const prevValue = forecastedValues[lastIndex];
+                let newValue: number;
+
+                if (currentForecastType === 'average') {
+                    const lastThreeValues = forecastedValues.slice(-3);
+                    if (lastThreeValues.length === 3) {
+                        newValue = Math.round(lastThreeValues.reduce((sum, v) => sum + v, 0) / 3);
+                    } else {
+                        newValue = Math.round(prevValue || 0);
+                    }
+                } else {
+                    newValue = Math.round(prevValue + (prevValue * (currentMultiplier / 100)));
+                }
+
+                forecastedValues.push(newValue);
+            }
+
+            const chartData = extendedYears.map((year, i) => ({
+                year,
+                value: forecastedValues[i]
+            }));
+
+            return (
+                <>
+                    <TableRow key={label}>
+                        <TableCell>
+                            <select
+                                value={currentForecastType}
+                                onChange={(e) => handleForecastTypeChange(label, e.target.value as 'average' | 'multiplier')}
+                                className="bg-white p-1 border rounded"
+                            >
+                                <option value="average">Average</option>
+                                <option value="multiplier">Multiplier</option>
+                            </select>
+                        </TableCell>
+                        <TableCell>
+                            {currentForecastType === 'multiplier' ? (
+                                <input
+                                    type="number"
+                                    value={currentMultiplier}
+                                    onChange={(e) => handleMultiplierChange(label, e.target.value)}
+                                    className="w-full p-1 border rounded"
+                                    min="0" step="any"
+                                />
+                            ) : '1.0'}
+                        </TableCell>
+                        <TableCell>
+                            <div className="font-bold">{getColumnLabel(label)}</div>
+                            <button
+                                onClick={() => toggleChart(label)}
+                                className="text-blue-600 underline text-sm mt-1"
+                            >
+                                {visibleCharts[label] ? "Hide Graph" : "Show Graph"}
+                            </button>
+                        </TableCell>
+                        {forecastedValues.map((item, index) => (
+                            <TableCell key={index}>
+                                {typeof item === "number" ? item.toFixed(2) : "N/A"}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+
+                    {visibleCharts[label] && (
+                        <TableRow>
+                            <TableCell colSpan={extendedYears.length + 3}>
+                                <LineChart width={700} height={250} data={chartData}>
+                                    <XAxis dataKey="year" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Line type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={2} />
+                                </LineChart>
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </>
+            );
+        });
 
     return (
         <Tabs defaultValue="incomeStatement">
@@ -103,74 +193,7 @@ const ClientWrapper = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {Object.keys(incomeStatements[years[0]] || {}).map((label) => {
-                                const currentForecastType = forecastTypes[label] || 'average'; 
-                                const currentMultiplier = multipliers[label] !== undefined ? multipliers[label] : 1.5;
-
-                                // Get existing values for each year
-                                const existingValues = years.map(year => incomeStatements[year]?.[label] ?? 0);
-
-                                // Generate forecasted values
-                                const forecastedValues = [...existingValues];
-
-                                for (let i = 0; i < 5; i++) {
-                                    const lastIndex = forecastedValues.length - 1;
-                                    const prevValue = forecastedValues[lastIndex]; // This represents the current value (e.g., I45)
-
-                                    let newValue: number;
-    
-                                    if (currentForecastType === 'average') {
-                                        // For "AVERAGE", calculate the average of the last three values
-                                        const lastThreeValues = forecastedValues.slice(-3); // Get the last three values
-                                        
-                                        if (lastThreeValues.length === 3) {
-                                            newValue = Math.round(lastThreeValues.reduce((sum, v) => sum + v, 0) / 3); // Round the average normally
-                                        } else {
-                                            newValue = Math.round(prevValue || 0); //default to last value
-                                        }
-                                    } else {
-                                        // For "MULTIPLIER", calculate the new value using the updated formula: a + (a * multiplier)
-                                        newValue = Math.round(prevValue + (prevValue * (currentMultiplier/100))); // Updated calculation
-                                    }
-    
-                                    forecastedValues.push(newValue);
-                                }
-
-
-                                return (
-                                    <TableRow key={label}>
-                                        <TableCell>
-                                            <select
-                                                value={currentForecastType}
-                                                onChange={(e) => handleForecastTypeChange(label, e.target.value as 'average' | 'multiplier')}
-                                                className="bg-white p-1 border rounded"
-                                            >
-                                                <option value="average">Average</option>
-                                                <option value="multiplier">Multiplier</option>
-                                            </select>
-                                        </TableCell>
-                                        <TableCell>
-                                            {currentForecastType === 'multiplier' ? (
-                                                <input
-                                                    type="number"
-                                                    value={currentMultiplier}
-                                                    onChange={(e) => handleMultiplierChange(label, e.target.value)}
-                                                    className="w-full p-1 border rounded"
-                                                    min="0" step="any"
-                                                />
-                                            ) : (
-                                                '1.0'
-                                            )}
-                                        </TableCell>
-                                        <TableCell><div className="font-bold">{getColumnLabel(label)}</div></TableCell>
-                                        {forecastedValues.map((item, index) => (
-                                            <TableCell key={index}>
-                                                {typeof item === "number" ? item.toFixed(2) : "N/A"}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                );
-                            })}
+                            {renderRows(incomeStatements)}
                         </TableBody>
                     </Table>
                 )}
@@ -191,74 +214,7 @@ const ClientWrapper = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {Object.keys(balanceSheets[years[0]] || {}).map((label) => {
-                                const currentForecastType = forecastTypes[label] || 'average'; 
-                                const currentMultiplier = multipliers[label] !== undefined ? multipliers[label] : 1.5;
-
-                                // Get existing values for each year
-                                const existingValues = years.map(year => balanceSheets[year]?.[label] ?? 0);
-
-                                // Generate forecasted values
-                                const forecastedValues = [...existingValues];
-
-                                for (let i = 0; i < 5; i++) {
-                                    const lastIndex = forecastedValues.length - 1;
-                                    const prevValue = forecastedValues[lastIndex]; // This represents the current value (e.g., I45)
-
-                                    let newValue: number;
-    
-                                    if (currentForecastType === 'average') {
-                                        // For "AVERAGE", calculate the average of the last three values
-                                        const lastThreeValues = forecastedValues.slice(-3); // Get the last three values
-                                        
-                                        if (lastThreeValues.length === 3) {
-                                            newValue = Math.round(lastThreeValues.reduce((sum, v) => sum + v, 0) / 3); // Round the average normally
-                                        } else {
-                                            newValue = Math.round(prevValue || 0); //default to last value
-                                        }
-                                    } else {
-                                        // For "MULTIPLIER", calculate the new value using the updated formula: a + (a * multiplier)
-                                        newValue = Math.round(prevValue + (prevValue * (currentMultiplier/100))); // Updated calculation
-                                    }
-    
-                                    forecastedValues.push(newValue);
-                                }
-
-
-                                return (
-                                    <TableRow key={label}>
-                                        <TableCell>
-                                            <select
-                                                value={currentForecastType}
-                                                onChange={(e) => handleForecastTypeChange(label, e.target.value as 'average' | 'multiplier')}
-                                                className="bg-white p-1 border rounded"
-                                            >
-                                                <option value="average">Average</option>
-                                                <option value="multiplier">Multiplier</option>
-                                            </select>
-                                        </TableCell>
-                                        <TableCell>
-                                            {currentForecastType === 'multiplier' ? (
-                                                <input
-                                                    type="number"
-                                                    value={currentMultiplier}
-                                                    onChange={(e) => handleMultiplierChange(label, e.target.value)}
-                                                    className="w-full p-1 border rounded"
-                                                    min="0" step="any"
-                                                />
-                                            ) : (
-                                                '1.0'
-                                            )}
-                                        </TableCell>
-                                        <TableCell><div className="font-bold">{getColumnLabel(label)}</div></TableCell>
-                                        {forecastedValues.map((item, index) => (
-                                            <TableCell key={index}>
-                                                {typeof item === "number" ? item.toFixed(2) : "N/A"}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                );
-                            })}
+                            {renderRows(balanceSheets)}
                         </TableBody>
                     </Table>
                 )}
