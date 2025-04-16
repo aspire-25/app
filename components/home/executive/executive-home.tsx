@@ -2,9 +2,9 @@
 
 'use client';
 
-import React, { useState } from "react"; 
+import React, {useState, useEffect} from "react";
 import Image from "next/image";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label } from "recharts";
+import {CartesianGrid, Label, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 
 const ExecutiveHome: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>("Stress Test Results");
@@ -18,75 +18,261 @@ const ExecutiveHome: React.FC = () => {
     "Scenario #5: Decrease bond return to 1.7% due to increase in inflation"
   ]
 
-  const [selectedOption1, setSelectedOption1] = useState("");
-  const [selectedOption2, setSelectedOption2] = useState("");
-
   const optionsMap: Record<string, string[]> = {
-    "Income Statement": ["Net Sales", "Cost of Goods Sold", "Gross margin %", "Total operating expenses", "Operating expenses %",
-      "Profit (loss) from operations %", "Total other income (expense) %", "Income (loss) before income taxes", "Pre-tax income %",
-      "Net income (loss)", "Net income (loss) %"],
-    "Balance Sheet": ["Total Current Assets", "Total long-term asset", "Total Assets", "Total Current Liabilities", "Total Long-term Liabilities",
+    "Income Statement": ["Net Sales", "Cost of Goods Sold", "Gross margin %", "Total Operating Expenses", "Operating Expenses %",
+      "Profit (Loss) from Operations %", "Total Other Income (Expense) %", "Income (Loss) Before Income Taxes", "Pre-Tax Income %",
+      "Net Income (Loss)", "Net Income (Loss) %"],
+    "Balance Sheet": ["Total Current Assets", "Total Long-Term Asset", "Total Assets", "Total Current Liabilities", "Total Long-Term Liabilities",
       "Total Liabilities", "Total Stockholder's Equity", "Total Liabilities and Equity"]
   };
 
-  // Example data for different chart selections
-  const sampleData: Record<string, { year: string; value?: number; goodsSoldCost?: number; grossProfit?: number }[]> = {
-    "Net Sales": [
-      { year: "2025", value: 153034 },
-      { year: "2026", value: 155329 },
-      { year: "2027", value: 157659 },
-      { year: "2028", value: 160024 },
-      { year: "2029", value: 162424 },
-      { year: "2030", value: 164861 }
-    ],
-    "Cost of Goods Sold": [
-      { year: "2025", goodsSoldCost: 53000, grossProfit: 99500 },
-      { year: "2026", goodsSoldCost: 54000, grossProfit: 100500 },
-      { year: "2027", goodsSoldCost: 55000, grossProfit: 102613 },
-      { year: "2028", goodsSoldCost: 56000, grossProfit: 105485 },
-      { year: "2029", goodsSoldCost: 57000, grossProfit: 107755 },
-      { year: "2030", goodsSoldCost: 58000, grossProfit: 108372 }
-    ],
-    "Total Current Assets": [
-      { year: "2025", value: 200 },
-      { year: "2026", value: 250 },
-      { year: "2027", value: 300 }
-    ],
-    "Stress Tests": [ //placeholder
-      { year: "2025", goodsSoldCost: 900, grossProfit: 846 },
-      { year: "2026", goodsSoldCost: 1892, grossProfit: 1666 },
-      { year: "2027", goodsSoldCost: 2982, grossProfit: 2395 },
-      { year: "2028", goodsSoldCost: 4180, grossProfit: 2959 },
-      { year: "2029", goodsSoldCost: 5491, grossProfit: 3266 },
-      { year: "2030", goodsSoldCost: 6926, grossProfit: 3221 }
-    ]
+  // State for chart data
+  const [chartData, setChartData] = useState<Record<string, any[]>>({});
+
+  // Helper function to calculate percentages
+  const calculatePercentage = (value: number, total: number) => {
+    return total > 0 ? (value / total * 100).toFixed(2) + "%" : "0%";
   };
 
-  // Custom Tooltip Component
-  // Custom Tooltip Component
-  const CustomTooltip: React.FC<{ active?: boolean; payload?: any[]; label?: string }> = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      const { goodsSoldCost, grossProfit } = payload[0].payload; // Get the data from the hovered point
-
-      // Calculate the difference
-      const difference = grossProfit - goodsSoldCost;
-
-      return (
-        <div className="custom-tooltip p-2 bg-white border border-gray-300 rounded shadow-lg">
-          <p><strong>Year: </strong>{label}</p>
-          <p><strong>Principal: </strong>${goodsSoldCost}</p>
-          <p><strong>Stress Effect: </strong>${grossProfit}</p>
-          <p><strong>Interest Lost: </strong>${difference}</p>
+  // Helper function to render chart sections
+  const renderChartSection = (title: string, options: string[]) => (
+    <div className="mt-6">
+      <h3 className="text-xl font-bold mb-4 text-center">{title}</h3>
+      {options.map((option) => (
+        <div key={option}>
+          <h4 className="text-lg font-semibold">{option}</h4>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={chartData[option] || []} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="year" tickMargin={10}>
+                <Label value="Year" offset={-30} position="insideBottom" />
+              </XAxis>
+              <YAxis tickMargin={10} domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}>
+                <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
+              </YAxis>
+              <Tooltip content={<CustomTooltip />} />
+              <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
-      );
+      ))}
+    </div>
+  );
+
+  // Fetch financial data from API
+  useEffect(() => {
+    const fetchFinancialData = async () => {
+      try {
+        // Fetch financial data
+
+        const response = await fetch('/api/financials', {
+          method: 'GET',
+          cache: 'no-store'
+        });
+        const financials = await response.json();
+        const data = financials.data;
+        if (data) {
+          // Sort years numerically
+          const sortedYears = Object.keys(data).map(Number).sort((a, b) => a - b);
+          
+          const allBalanceSheets: Record<string, Record<string, any>> = {};
+          const allIncomeStatements: Record<string, Record<string, any>> = {};
+          
+          // Process data for each year
+          sortedYears.forEach(year => {
+            const balanceData = data[year]?.balance || {};
+            const incomeData = data[year]?.income || {};
+            
+            // Convert null values to 0
+            allBalanceSheets[year] = Object.fromEntries(
+              Object.entries(balanceData).map(([key, value]) => [key, value ?? 0])
+            );
+            
+            allIncomeStatements[year] = Object.fromEntries(
+              Object.entries(incomeData).map(([key, value]) => [key, value ?? 0])
+            );
+          });
+          
+          // Create flattened data from income statements and balance sheets
+          const flattenedData = sortedYears.map(year => {
+            const incomeData = allIncomeStatements[year] || {};
+            const balanceData = allBalanceSheets[year] || {};
+            
+            // Extract common values to reduce duplication
+            const revenue = incomeData.revenue || 0;
+            const contractingCost = incomeData.contractingCost || 0;
+            const overhead = incomeData.overhead || 0;
+            const salary = incomeData.salary || 0;
+            const rent = incomeData.rent || 0;
+            const depreciation = incomeData.depreciation || 0;
+            const operatingInterest = incomeData.operatingInterest || 0;
+            const interestIncome = incomeData.interestIncome || 0;
+            const interestExpense = incomeData.interestExpense || 0;
+            const assetGain = incomeData.assetGain || 0;
+            const otherIncome = incomeData.otherIncome || 0;
+            const incomeTax = incomeData.incomeTax || 0;
+            
+            // Calculate derived values
+            const cogs = contractingCost + overhead;
+            const grossProfit = revenue - cogs;
+            const opEx = salary + rent + depreciation + operatingInterest;
+            const otherInc = interestIncome - interestExpense + assetGain + otherIncome;
+            const profitFromOps = grossProfit - opEx;
+            const incomeBeforeTax = profitFromOps + otherInc;
+            const netInc = incomeBeforeTax - incomeTax;
+            
+            // Extract common balance sheet values
+            const cash = balanceData.cash || 0;
+            const accountReceivable = balanceData.accountReceivable || 0;
+            const inventory = balanceData.inventory || 0;
+            const longTermProperty = balanceData.longTermProperty || 0;
+            const longTermAsset = balanceData.longTermAsset || 0;
+            const accountPayable = balanceData.accountPayable || 0;
+            const currentDebtService = balanceData.currentDebtService || 0;
+            const taxPayable = balanceData.taxPayable || 0;
+            const longTermDebtService = balanceData.longTermDebtService || 0;
+            const loanPayable = balanceData.loanPayable || 0;
+            const equityCapital = balanceData.equityCapital || 0;
+            const retainedEarning = balanceData.retainedEarning || 0;
+            
+            // Calculate derived balance sheet values
+            const currentAssets = cash + accountReceivable + inventory;
+            const longTermAssets = longTermProperty + longTermAsset;
+            const totalAssets = currentAssets + longTermAssets;
+            const currentLiabilities = accountPayable + currentDebtService + taxPayable;
+            const longTermLiabilities = longTermDebtService + loanPayable;
+            const totalLiabilities = currentLiabilities + longTermLiabilities;
+            const equity = equityCapital + retainedEarning;
+            const liabilitiesAndEquity = totalLiabilities + equity;
+            
+            return {
+              year: year.toString(),
+              // Income Statement fields
+              netSales: revenue,
+              costOfGoodsSold: cogs,
+              grossProfit: grossProfit,
+              grossMargin: calculatePercentage(grossProfit, revenue),
+              totalOperatingExpenses: opEx,
+              operatingExpenses: calculatePercentage(opEx, revenue),
+              profitFromOperations: profitFromOps,
+              profitFromOperationsMargin: calculatePercentage(profitFromOps, revenue),
+              totalOtherIncome: otherInc,
+              totalOtherIncomeMargin: calculatePercentage(otherInc, revenue),
+              incomeBeforeTax: incomeBeforeTax,
+              incomeBeforeTaxMargin: calculatePercentage(incomeBeforeTax, revenue),
+              netIncome: netInc,
+              netIncomeMargin: calculatePercentage(netInc, revenue),
+              
+              // Balance Sheet fields
+              totalCurrentAssets: currentAssets,
+              totalLongTermAssets: longTermAssets,
+              totalAssets: totalAssets,
+              totalCurrentLiabilities: currentLiabilities,
+              totalLongTermLiabilities: longTermLiabilities,
+              totalLiabilities: totalLiabilities,
+              totalStockholdersEquity: equity,
+              totalLiabilitiesAndEquity: liabilitiesAndEquity
+            };
+          });
+        
+          
+          // Helper function to process metrics
+          const processMetric = (fieldName: string, isPercentage = false) => {
+            return flattenedData.map((item: any) => {
+              const value = item[fieldName] !== undefined ? item[fieldName] : 0;
+              return {
+                year: item.year,
+                value: isPercentage && typeof value === 'string' ? 
+                  parseFloat(value.replace('%', '')) : 
+                  (parseFloat(value) || 0)
+              };
+            });
+          };
+          
+          // Process data for each metric in optionsMap
+          const processedChartData: Record<string, any[]> = {};
+          
+          // Process Income Statement metrics
+          processedChartData["Net Sales"] = processMetric("netSales");
+          processedChartData["Cost of Goods Sold"] = processMetric("costOfGoodsSold");
+          processedChartData["Gross margin %"] = processMetric("grossMargin", true);
+          processedChartData["Total Operating Expenses"] = processMetric("totalOperatingExpenses");
+          processedChartData["Operating Expenses %"] = processMetric("operatingExpenses", true);
+          processedChartData["Profit (Loss) from Operations %"] = processMetric("profitFromOperationsMargin", true);
+          processedChartData["Total Other Income (Expense) %"] = processMetric("totalOtherIncomeMargin", true);
+          processedChartData["Income (Loss) Before Income Taxes"] = processMetric("incomeBeforeTax");
+          processedChartData["Pre-Tax Income %"] = processMetric("incomeBeforeTaxMargin", true);
+          processedChartData["Net Income (Loss)"] = processMetric("netIncome");
+          processedChartData["Net Income (Loss) %"] = processMetric("netIncomeMargin", true);
+          
+          // Process Balance Sheet metrics
+          processedChartData["Total Current Assets"] = processMetric("totalCurrentAssets");
+          processedChartData["Total Long-Term Asset"] = processMetric("totalLongTermAssets");
+          processedChartData["Total Assets"] = processMetric("totalAssets");
+          processedChartData["Total Current Liabilities"] = processMetric("totalCurrentLiabilities");
+          processedChartData["Total Long-Term Liabilities"] = processMetric("totalLongTermLiabilities");
+          processedChartData["Total Liabilities"] = processMetric("totalLiabilities");
+          processedChartData["Total Stockholder's Equity"] = processMetric("totalStockholdersEquity");
+          processedChartData["Total Liabilities and Equity"] = processMetric("totalLiabilitiesAndEquity");
+        
+          
+          // Add stress test data (using sample data for now)
+          processedChartData["Stress Tests"] = [
+          { year: "2025", goodsSoldCost: 900, grossProfit: 846 },
+          { year: "2026", goodsSoldCost: 1892, grossProfit: 1666 },
+          { year: "2027", goodsSoldCost: 2982, grossProfit: 2395 },
+          { year: "2028", goodsSoldCost: 4180, grossProfit: 2959 },
+          { year: "2029", goodsSoldCost: 5491, grossProfit: 3266 },
+          { year: "2030", goodsSoldCost: 6926, grossProfit: 3221 }
+        ];
+        
+          setChartData(processedChartData);
+        }
+      } catch {
+        // Handle error silently
+      }
+    };
+    
+    fetchFinancialData();
+  }, []);
+
+  // Custom Tooltip Component
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      // Check if this is a stress test chart
+      if (payload[0].payload.goodsSoldCost !== undefined) {
+        const { goodsSoldCost, grossProfit } = payload[0].payload;
+        return (
+          <div className="custom-tooltip p-2 bg-white border border-gray-300 rounded shadow-lg">
+            <p><strong>Year: </strong>{label}</p>
+            <p><strong>Principal: </strong>${goodsSoldCost?.toLocaleString()}</p>
+            <p><strong>Stress Effect: </strong>${grossProfit?.toLocaleString()}</p>
+          </div>
+        );
+      } else {
+        // Regular financial data tooltip
+        const dataValue = payload[0].value;
+        const dataName = payload[0].name || '';
+        
+        return (
+          <div className="custom-tooltip p-2 bg-white border border-gray-300 rounded shadow-lg">
+            <p><strong>Year: </strong>{label}</p>
+            <p><strong>Value: </strong>{typeof dataValue === 'number' ? 
+              dataName.includes('%') ? 
+                `${dataValue.toFixed(2)}%` : 
+                `$${dataValue.toLocaleString()}` 
+              : dataValue}
+            </p>
+          </div>
+        );
+      }
     }
     return null;
   };
 
-
   // Toggle function
   const toggleSwitch = (index: number) => {
-    setToggles((prev) => {
+    setToggles((prev: boolean[]) => {
       const updatedToggles = [...prev];
       updatedToggles[index] = !updatedToggles[index];
       return updatedToggles;
@@ -151,20 +337,36 @@ const ExecutiveHome: React.FC = () => {
                     {/* <p className="text-gray-600">📊 Graph Placeholder for Stress Test #{index + 1}</p> */}
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart
-                        data={sampleData["Stress Tests"]} // Replace with actual data for the stress test
+                        data={chartData["Stress Tests"] || []} // Use real data if available
                         margin={{ top: 20, right: 20, bottom: 30, left: 60 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="year" tickMargin={10}>
                           <Label value="Year" offset={-30} position="insideBottom" />
                         </XAxis>
-                        <YAxis tickMargin={10}>
+                        <YAxis
+                          tickMargin={10}
+                          // Dynamically set the domain to range from the rounded lower tick to the rounded upper tick
+                          domain={['auto', (dataMax: number) => {
+                            // Step 1: Round the dataMax to the nearest 500 or 1000 (or your preferred value)
+                            // Round up to the next multiple of 500
+                            return Math.ceil(dataMax / 500) * 500;
+                          }]}
+                          tickFormatter={(tick) => {
+                            // Step 2: Round the tick value to the nearest 500 for cleaner ticks
+                            const roundedTick = Math.round(tick / 500) * 500;
+
+                            // Step 3: Format the tick value with commas
+                            return roundedTick.toLocaleString();
+                          }}
+                        >
                           <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
                         </YAxis>
+
                         <Tooltip content={<CustomTooltip />} />
                         {/* Render multiple lines for different stress test scenarios */}
-                        <Line type="monotone" dataKey="goodsSoldCost" stroke="#8884d8" strokeWidth={2} name="Principal" />
-                        <Line type="monotone" dataKey="grossProfit" stroke="#82ca9d" strokeWidth={2} name="Stress Effect" />
+                        <Line type="monotone" dataKey="goodsSoldCost" stroke="#8884d8" strokeWidth={2} name="Principal"/>
+                        <Line type="monotone" dataKey="grossProfit" stroke="#82ca9d" strokeWidth={2} name="Stress Effect"/>
                         {/* Add more lines later */}
                       </LineChart>
                     </ResponsiveContainer>
@@ -174,63 +376,14 @@ const ExecutiveHome: React.FC = () => {
             ))}
           </div>
         ) : (
-          /*Sustainability Model section*/
+          /* Sustainability Model section */
           <div className="p-5 border rounded bg-gray-100">
-            <div className="flex space-x-4 items-center justify-center">
-              <h3>From</h3>
-              <select
-                className="p-2 border border-gray-300 rounded md"
-                value={selectedOption1}
-                onChange={(e) => {
-                  setSelectedOption1(e.target.value);
-                  setSelectedOption2(""); // Reset second dropdown when first changes
-                }}
-              >
-                <option value="">Select</option>
-                {Object.keys(optionsMap).map((key) => (
-                  <option key={key} value={key}>{key}</option>
-                ))}
-              </select>
-              <h3>View</h3>
-              <select
-                className="p-2 border border-gray-300 rounded-md"
-                value={selectedOption2}
-                onChange={(e) => setSelectedOption2(e.target.value)}
-                disabled={!selectedOption1}
-              >
-                <option value="">Select</option>
-                {selectedOption1 && optionsMap[selectedOption1].map((option, index) => (
-                  <option key={index} value={option}>{option}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-center justify-center text-gray-600">
-              {selectedOption2 && sampleData[selectedOption2] ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={sampleData[selectedOption2]} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="year" tickMargin={10}>
-                      <Label value="Year" offset={-30} position="insideBottom" />
-                    </XAxis>
-                    <YAxis tickMargin={10}>
-                      <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
-                    </YAxis>
-                    <Tooltip />
-                    {/* Render different lines depending on selectedOption2 */}
-                    {selectedOption2 === "Cost of Goods Sold" ? (
-                      <>
-                        <Line type="monotone" dataKey="goodsSoldCost" stroke="#8884d8" strokeWidth={2} name="Cost of Goods Sold" />
-                        <Line type="monotone" dataKey="grossProfit" stroke="#82ca9d" strokeWidth={2} name="Gross Profit" />
-                      </>
-                    ) : (
-                      <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
-                    )}
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <p> Select an option to view the graph</p>
-                /*<p>📊 Select an option to view the graph</p>*/
-              )}
+            <div className="space-y-6">
+              {/* Render Income Statement Section */}
+              {renderChartSection("Income Statement", optionsMap["Income Statement"])}
+              
+              {/* Render Balance Sheet Section */}
+              {renderChartSection("Balance Sheet", optionsMap["Balance Sheet"])}
             </div>
           </div>
         )}
@@ -238,6 +391,5 @@ const ExecutiveHome: React.FC = () => {
     </div>
   );
 };
-
 
 export default ExecutiveHome;
