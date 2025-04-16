@@ -22,49 +22,51 @@ const StressTest5InputSLC =() => {
     /* ======= This function and object will be used to initialize state; thus it's put up here to make sure code is DRY. ======= */
     const defaults = {
         presentValue: 5000,
-        interestRate: -1,
-        term: 30,
+        interestRate: 5.0,
         loanStartDate: new Date(2025, 0, 30),
         numPayments: 288,
-        monthlyPayment: 23.80,
     }
 
-    const generateTableData = (presentValue: number, interestRate: number, term: number, reinvestedInterest: number) => {
+    const generateTableData = (presentValue: number, interestRate: number, loanStartDate: Date, numPayments: number) => {
         const data = []
-        let calculatedBalance = presentValue
-        for (let i = 0; i < Number(term); i++) {
+        let beginningBalance = presentValue
+        let paymentDate = loanStartDate
+        for (let i = 0; i < numPayments; i++) {
             if (i > 0) {
-                calculatedBalance = data[i-1].balancePayment
+                beginningBalance = data[i-1].endingBalance
+                paymentDate = data[i-1].paymentDate
+                if (paymentDate.getMonth() == 11) {
+                    // if the month is december, set the month to 0 (Jan) and increment the year.
+                    paymentDate.setMonth(0)
+                    paymentDate.setFullYear(data[i-1].paymentDate.getFullYear() + 1)
+                } else {
+                    // if not, increment the months per usual.
+                    paymentDate.setMonth(data[i-1].paymentDate.getMonth() + 1)
+                }
             }
 
-            // these values are taken from Stress Test 5A. Need to link to backend.
-
-            const loanPayment = 394
-            const interestPayment = 25
-
-            const interestEarned = (calculatedBalance * (interestRate / 100))
-            const interestAndBalance = (calculatedBalance * (1 + (interestRate / 100)))
-            const amtPaidToInvestor = (interestEarned * ((100-reinvestedInterest)/100))
-            const prinPaidTowardLoan = interestEarned - loanPayment
-            const balancePayment = interestAndBalance - amtPaidToInvestor - loanPayment + interestPayment
-
-            const totalPaidOnLoan = 0
-
+            const interest = (beginningBalance*(interestRate/100)) / 12
+            const endingBalance = beginningBalance - interest
+            
             data.push({
-                year: i+1,
-                balance: calculatedBalance,
-                interestEarned: interestEarned,
-                interestAndBalance: interestAndBalance,
-                amtPaidToInvestor: amtPaidToInvestor,
-                newBalance: interestAndBalance - amtPaidToInvestor,
-                loanPayment: loanPayment, // <- value from 5A
-                interestPayment: interestPayment, // <- value from 5A
-                balancePayment: balancePayment,
-                prinPaidTowardLoan: prinPaidTowardLoan,
-                totalPaidOnLoan: totalPaidOnLoan
+                paymentDate: paymentDate,
+                beginningBalance: beginningBalance,
+                monthlyPayment: 0,
+                principal: 0,
+                interest: interest,
+                endingBalance: endingBalance
             })
         }
 
+        const sumOfInterest = data.reduce((total, item) => total + item.interest, 0)
+        const sumOfLoan = presentValue + sumOfInterest
+        const monthlyPayment = sumOfLoan / numPayments
+
+        data.forEach(item => {
+            item.monthlyPayment = monthlyPayment
+            item.principal = monthlyPayment - item.interest
+        })
+        console.log(data)
         return data
     }
 
@@ -73,50 +75,38 @@ const StressTest5InputSLC =() => {
     const [modelParams, updateModelParams] = useState<{
         presentValue: number,
         interestRate: number,
-        term: number,
         loanStartDate: Date,
-        monthlyPayment: number,
         numPayments: number
     }>(() => {
        return ({
             presentValue: 5000,
-            interestRate: 0,
-            term: 30,
+            interestRate: 5.0,
             loanStartDate: new Date(2025, 0, 30),
-            monthlyPayment: 23.80,
             numPayments: 288
         })
     })
 
     const [tableData, updateTableData] = useState<{ 
-        year: number, 
-        balance: number, 
-        interestEarned: number, 
-        interestAndBalance: number ,
-        amtPaidToInvestor: number,
-        newBalance: number,
-        loanPayment: number,
-        interestPayment: number,
-        balancePayment: number,
-        prinPaidTowardLoan: number,
-        totalPaidOnLoan: number,
-    
+        paymentDate: Date,
+        beginningBalance: number, 
+        principal: number, 
+        endingBalance: number ,
+        monthlyPayment: number,
+        interest: number,
+
     }[]>(() => {
         // calculate the table data and assign it to state.
 
-        let defaultTableData: { year: number, 
-            balance: number, 
-            interestEarned: number, 
-            interestAndBalance: number ,
-            amtPaidToInvestor: number,
-            newBalance: number,
-            loanPayment: number,
-            interestPayment: number,
-            balancePayment: number,
-            prinPaidTowardLoan: number,
-            totalPaidOnLoan: number }[] = []
+        let defaultTableData: {
+            paymentDate: Date,
+            beginningBalance: number, 
+            principal: number, 
+            endingBalance: number ,
+            monthlyPayment: number,
+            interest: number,
+        }[] = []
 
-        defaultTableData = generateTableData(defaults.presentValue, defaults.interestRate, defaults.term, 0)
+        defaultTableData = generateTableData(defaults.presentValue, defaults.interestRate, defaults.loanStartDate, defaults.numPayments)
 
         // send default data to the parent component upon initialization
         /*
@@ -132,7 +122,7 @@ const StressTest5InputSLC =() => {
         console.log(event.target.value)
         let updatedParams
         if (event.target.name == "loanStartDate") {
-            updatedParams = {...modelParams, [event.target.name] : new Date(event.target.value)}
+            updatedParams = {...modelParams, [event.target.name] : new Date(event.target.value + ":")} // <- added this to convert to local time
         } else {
             updatedParams = {...modelParams, [event.target.name] : Number(event.target.value)}
         }
@@ -140,7 +130,7 @@ const StressTest5InputSLC =() => {
         console.log(updatedParams)
         updateModelParams(updatedParams);
 
-        const updatedTableData = generateTableData(updatedParams.presentValue, updatedParams.interestRate, updatedParams.term, 0)
+        const updatedTableData = generateTableData(updatedParams.presentValue, updatedParams.interestRate, updatedParams.loanStartDate, updatedParams.numPayments)
         updateTableData(updatedTableData)
 
         // send to parent
@@ -172,23 +162,27 @@ const StressTest5InputSLC =() => {
                             <Button type="submit"  className="bg-cyan-900">Save</Button>
                         </div>
 
+                        {/*
                         <Label htmlFor="term" className="mb-1">Loan Period (yrs)</Label>
                         <div className="flex">
                             <Input type="number" id="term" placeholder="Enter in years" className="text-base mb-3" value={modelParams.term} name="term" onChange={handleUpdate}/>
                             <Button type="submit"  className="bg-cyan-900">Save</Button>
                         </div>
-
+                        */}
+                        
                         <Label htmlFor="loanStartDate" className="mb-1">Loan Start Date</Label>
                         <div className="flex">
                             <Input type="date" id="loanStartDate" placeholder="" className="text-base mb-3" name="loanStartDate" onChange={handleUpdate}/>
                             <Button type="submit"  className="bg-cyan-900">Save</Button>
                         </div>
-
+                        
+                        {/*
                         <Label htmlFor="monthlyPayment" className="mb-1">Monthly Payment ($)</Label>
                         <div className="flex">
                             <Input type="number" id="monthlyPayment" placeholder="Monthly Payment ($)" className="text-base mb-3" value={modelParams.monthlyPayment} name="monthlyPayment" onChange={handleUpdate}/>
                             <Button type="submit" className="bg-cyan-900">Save</Button>
                         </div>
+                        */}
 
                         <Label htmlFor="numPayments" className="mb-1">Number of Payments</Label>
                         <div className="flex">
@@ -204,20 +198,17 @@ const StressTest5InputSLC =() => {
                     <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Output Summary</div>
                     <div>
                         <p className="text-base">
-                            <b>At Yr 5:</b> Value = <b className="text-indigo-900">{tableData.length >= 5 ? "$" + Math.floor(tableData[4].newBalance) + " (Appreciation " + (((tableData[4].newBalance - modelParams.presentValue) / modelParams.presentValue)*100).toFixed(2) + "%)" : "N/A (please specify a greater year)"}</b>, Total interest earned = <b className="text-amber-900">{tableData.length >= 5 ? "$" + (tableData.slice(0, 5).reduce((total, item) => total + item.interestEarned, 0)).toFixed(2) : "N/A (please specify a greater year)"}</b>
+                            <b>Total Interest: </b> $<b className="text-indigo-900">{(tableData.reduce((total, item) => total + item.interest, 0)).toFixed(2)}</b>
                         </p>
                         <br></br>
                         <p className="text-base">
-                            <b>At Yr 30:</b> Value = <b className="text-indigo-900">{tableData.length >= 30 ? "$" + Math.floor(tableData[29].newBalance) + " (Appreciation " + (((tableData[29].newBalance - modelParams.presentValue) / modelParams.presentValue)*100).toFixed(2) + "%)" : "N/A (please specify a greater year)"}</b>, Total interest earned = <b className="text-amber-900">{tableData.length >= 29 ? "$" + (tableData.slice(0, 30).reduce((total, item) => total + item.interestEarned, 0)).toFixed(2) : "N/A (please specify a greater year)"}</b>
+                            <b>Total Interest: </b> $<b className="text-indigo-900">{(tableData.reduce((total, item) => total + item.interest, 0) + modelParams.presentValue).toFixed(2)}</b>
                         </p>
                         <br></br>
                         <p className="text-base">
-                            <b>Total loan payment: </b><b className="text-indigo-900">${(tableData.reduce((total, item) => total + item.loanPayment, 0)).toFixed(2)}</b>
+                            <b>Total Interest: </b> $<b className="text-indigo-900">{((tableData.reduce((total, item) => total + item.interest, 0) + modelParams.presentValue) / modelParams.numPayments).toFixed(2)}</b>
                         </p>
                         <br></br>
-                        <p className="text-base">
-                            <b>Total amount of principal paid towards loan: </b><b className="text-indigo-900">${(tableData.reduce((total, item) => total + item.prinPaidTowardLoan, 0)).toFixed(2)}</b>
-                        </p>
                     </div>
                 </div>
 
@@ -227,7 +218,7 @@ const StressTest5InputSLC =() => {
 
             {/* for the chart */}
 
-            <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Hahaha</div>
+            <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Payments by month</div>
             <div className="overflow-y-auto" >
                 <Table>
                     <TableHeader>
@@ -241,17 +232,17 @@ const StressTest5InputSLC =() => {
                     
                     {/* table body */}
                     <TableBody>
-                        {tableData.map((item) => (
-                            <TableRow key={item.year} className="text-xs text-center">
+                        {tableData.map((item, index) => (
+                            <TableRow key={index} className="text-xs text-center">
                                 {Object.keys(item).map((rowKey) => (
                                     // dumb TypeScript makes me put "item[rowKey as keyof typeof item]" instead of simply "item[rowKey]" 💀
-
-                                    (rowKey == "year" ? (
-                                        <TableCell key={rowKey} className="text-base font-bold">{Math.round(item.year)}</TableCell>
+                                    
+                                    (rowKey == "paymentDate" ? (
+                                        <TableCell key={rowKey} className="text-base font-bold">{item[rowKey].getFullYear()}</TableCell>
                                     ) : (
-                                        (Math.round(item[rowKey as keyof typeof item]) >= 0) ? 
-                                        (<TableCell key={rowKey}>${Math.round(item[rowKey as keyof typeof item])}</TableCell>) : 
-                                        (<TableCell key={rowKey} className="text-red-900">(${0-Math.round(item[rowKey as keyof typeof item])}) <sup>[neg]</sup></TableCell>)
+                                        (Math.round(item[rowKey as keyof unknown]) >= 0) ? 
+                                        (<TableCell key={rowKey}>${Math.round(item[rowKey as keyof unknown])}</TableCell>) : 
+                                        (<TableCell key={rowKey} className="text-red-900">(${0-Math.round(item[rowKey as keyof unknown])}) <sup>[neg]</sup></TableCell>)
                                     ))
                                     
                                 ))}
