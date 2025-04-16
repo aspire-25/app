@@ -228,7 +228,7 @@ const ExecutiveHome: React.FC = () => {
         
           setChartData(processedChartData);
         }
-      } catch (_) {
+      } catch {
         // Handle error silently
       }
     };
