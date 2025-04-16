@@ -34,7 +34,7 @@ const LossOfInterestTable: React.FC<ChildProps> = ({ principalData }) => {
     }
 
     const convertIncomingToChart = () => {
-        let cleanedDataArray = []
+        const cleanedDataArray = []
         for (let i = 0; i < 12; i++) {
             cleanedDataArray.push({
                 name: Number(currentDate.getFullYear()) + i,
