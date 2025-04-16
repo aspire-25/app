@@ -9,6 +9,9 @@ import {
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import React from "react";
+
 interface ChildProps {
     principalData: number[];
 }
@@ -32,6 +35,8 @@ const LossOfInterestTable: React.FC<ChildProps> = ({ principalData }) => {
         })
         return sum;
     }
+
+    const [varToDisplay, setVarToDisplay] = React.useState("principal")
 
     const convertIncomingToChart = () => {
         let cleanedDataArray = []
@@ -118,11 +123,24 @@ const LossOfInterestTable: React.FC<ChildProps> = ({ principalData }) => {
                 </TabsContent>
 
                 <TabsContent value="chart">
-                    <LineChart width={1000} height={window.innerHeight *0.8} data={convertIncomingToChart()}
+                    <Select>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue defaultValue="Principal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="Principal" onSelect={()=> setVarToDisplay("principal")}>Principal</SelectItem>
+
+                                <SelectItem value="Loss of Interest" onSelect={()=> setVarToDisplay("loss")}>Loss of Interest</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                    
+                    <LineChart width={1000} height={window.innerHeight *0.6} data={convertIncomingToChart()}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="6 6" />
                         <XAxis dataKey="name" />
-                        <YAxis dataKey="loss_of_interest" orientation="left"/>
+                        <YAxis orientation="left"/>
                         <Tooltip separator=": $"/>
                         <Legend />
                         <Line type="monotone" dataKey="principal" stroke="goldenrod" strokeWidth={3}/>
