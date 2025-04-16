@@ -5,8 +5,6 @@
 import React, {useState, useEffect} from "react";
 import Image from "next/image";
 import {CartesianGrid, Label, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
-import { CalculatedFinancialReportCollection } from "@/lib/fetch";
-import { flattenFinancialReportCollection } from "@/lib/financials";
 
 const ExecutiveHome: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>("Stress Test Results");
@@ -30,11 +28,6 @@ const ExecutiveHome: React.FC = () => {
 
   // State for chart data
   const [chartData, setChartData] = useState<Record<string, any[]>>({});
-  
-  // State for financial data
-  const [incomeStatements, setIncomeStatements] = useState<Record<string, Record<string, any>>>({});
-  const [balanceSheets, setBalanceSheets] = useState<Record<string, Record<string, any>>>({});
-  const [years, setYears] = useState<string[]>([]);
 
   // Fetch financial data from the API - using the same approach as the visualizer component
   useEffect(() => {
@@ -55,7 +48,6 @@ const ExecutiveHome: React.FC = () => {
         if (data) {
           // Sort years numerically
           const sortedYears = Object.keys(data).map(Number).sort((a, b) => a - b);
-          setYears(sortedYears.map(String));
           
           const allBalanceSheets: Record<string, Record<string, any>> = {};
           const allIncomeStatements: Record<string, Record<string, any>> = {};
@@ -75,8 +67,7 @@ const ExecutiveHome: React.FC = () => {
             );
           });
           
-          setBalanceSheets(allBalanceSheets);
-          setIncomeStatements(allIncomeStatements);
+          // Process the data directly without storing in state
           
           console.log("Income Statements:", allIncomeStatements);
           console.log("Balance Sheets:", allBalanceSheets);
