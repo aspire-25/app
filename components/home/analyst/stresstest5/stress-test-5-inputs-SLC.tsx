@@ -31,6 +31,9 @@ const StressTest5InputSLC =() => {
         const data = []
         let beginningBalance = presentValue
         let paymentDate = loanStartDate
+
+        // calculate the monthly payment upfront
+        let monthlyPayment = ((interestRate / 1200) * presentValue) / (1 - Math.pow(1+(interestRate / 1200), 0-numPayments))
         for (let i = 0; i < numPayments; i++) {
             if (i > 0) {
                 beginningBalance = data[i-1].endingBalance
@@ -45,28 +48,20 @@ const StressTest5InputSLC =() => {
                 }
             }
 
-            const interest = (beginningBalance*(interestRate/100)) / 12
-            const endingBalance = beginningBalance - interest
+            const interest = (beginningBalance*((interestRate/100)/12))
+            const principal = monthlyPayment - interest
+            const endingBalance = beginningBalance - principal
             
             data.push({
                 paymentDate: paymentDate,
                 beginningBalance: beginningBalance,
-                monthlyPayment: 0,
-                principal: 0,
+                monthlyPayment: monthlyPayment,
+                principal: principal,
                 interest: interest,
                 endingBalance: endingBalance
             })
         }
 
-        const sumOfInterest = data.reduce((total, item) => total + item.interest, 0)
-        const sumOfLoan = presentValue + sumOfInterest
-        const monthlyPayment = sumOfLoan / numPayments
-
-        data.forEach(item => {
-            item.monthlyPayment = monthlyPayment
-            item.principal = monthlyPayment - item.interest
-        })
-        console.log(data)
         return data
     }
 
@@ -202,11 +197,11 @@ const StressTest5InputSLC =() => {
                         </p>
                         <br></br>
                         <p className="text-base">
-                            <b>Total Interest: </b> $<b className="text-indigo-900">{(tableData.reduce((total, item) => total + item.interest, 0) + modelParams.presentValue).toFixed(2)}</b>
+                            <b>Total cost of loan: </b> $<b className="text-indigo-900">{(tableData.reduce((total, item) => total + item.interest, 0) + modelParams.presentValue).toFixed(2)}</b>
                         </p>
                         <br></br>
                         <p className="text-base">
-                            <b>Total Interest: </b> $<b className="text-indigo-900">{((tableData.reduce((total, item) => total + item.interest, 0) + modelParams.presentValue) / modelParams.numPayments).toFixed(2)}</b>
+                            <b>Monthly payment: </b> $<b className="text-indigo-900">{((tableData.reduce((total, item) => total + item.interest, 0) + modelParams.presentValue) / modelParams.numPayments).toFixed(2)}</b>
                         </p>
                         <br></br>
                     </div>
