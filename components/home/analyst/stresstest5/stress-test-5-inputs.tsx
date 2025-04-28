@@ -241,7 +241,7 @@ const StressTest5Input: React.FC<ChildProps> = ({ onParamsUpdate, version, intrD
                     {/* table body */}
                     <TableBody>
                         {tableData.map((item) => (
-                            <TableRow key={item.year} className="text-xs text-center">
+                            <TableRow key={item.year} className="text-sm text-center">
                                 {Object.keys(item).map((rowKey) => (
                                     // dumb TypeScript makes me put "item[rowKey as keyof typeof item]" instead of simply "item[rowKey]" 💀
 

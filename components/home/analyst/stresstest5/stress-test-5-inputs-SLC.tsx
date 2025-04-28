@@ -37,7 +37,7 @@ const StressTest5InputSLC =() => {
         for (let i = 0; i < numPayments; i++) {
             if (i > 0) {
                 beginningBalance = data[i-1].endingBalance
-                paymentDate = data[i-1].paymentDate
+                paymentDate = new Date(data[i-1].paymentDate)
                 if (paymentDate.getMonth() == 11) {
                     // if the month is december, set the month to 0 (Jan) and increment the year.
                     paymentDate.setMonth(0)
@@ -47,7 +47,7 @@ const StressTest5InputSLC =() => {
                     paymentDate.setMonth(data[i-1].paymentDate.getMonth() + 1)
                 }
             }
-
+            console.log(paymentDate)
             const interest = (beginningBalance*((interestRate/100)/12))
             const principal = monthlyPayment - interest
             const endingBalance = beginningBalance - principal
@@ -61,7 +61,7 @@ const StressTest5InputSLC =() => {
                 endingBalance: endingBalance
             })
         }
-
+        console.log(data)
         return data
     }
 
@@ -228,15 +228,15 @@ const StressTest5InputSLC =() => {
                     {/* table body */}
                     <TableBody>
                         {tableData.map((item, index) => (
-                            <TableRow key={index} className="text-xs text-center">
+                            <TableRow key={index} className="text-sm text-center">
                                 {Object.keys(item).map((rowKey) => (
                                     // dumb TypeScript makes me put "item[rowKey as keyof typeof item]" instead of simply "item[rowKey]" 💀
                                     
                                     (rowKey == "paymentDate" ? (
-                                        <TableCell key={rowKey} className="text-base font-bold">{item[rowKey].getFullYear()}</TableCell>
+                                        <TableCell key={rowKey} className="text-base font-bold">{(item[rowKey].getMonth() + 1) + "/" + item[rowKey].getDate() + "/" + item[rowKey].getFullYear()}</TableCell>
                                     ) : (
                                         (Math.round(item[rowKey as keyof unknown]) >= 0) ? 
-                                        (<TableCell key={rowKey}>${Math.round(item[rowKey as keyof unknown])}</TableCell>) : 
+                                        (<TableCell key={rowKey}>${Number(item[rowKey as keyof unknown]).toFixed(2)}</TableCell>) : 
                                         (<TableCell key={rowKey} className="text-red-900">(${0-Math.round(item[rowKey as keyof unknown])}) <sup>[neg]</sup></TableCell>)
                                     ))
                                     
