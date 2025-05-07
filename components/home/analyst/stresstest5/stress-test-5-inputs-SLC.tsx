@@ -278,14 +278,14 @@ const StressTest5InputSLC=() => {
                             
                         </div>
                     <br/>
-                    <ResponsiveContainer width="100%" height={window.innerHeight *0.6}>
+                    <ResponsiveContainer width="100%" height={window.innerHeight *0.5}>
                         <LineChart data={tableData}
                             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="6 6" />
                                 <XAxis dataKey="paymentDateString" />
                                 <YAxis orientation="left"/>
                                 <Tooltip separator=": $"/>
-                                <Line type="basis" dataKey={chartVar} stroke="blue" strokeWidth={2}/>
+                                <Line type="basis" dataKey={chartVar} stroke="black" strokeWidth={3}/>
                         </LineChart>
                     </ResponsiveContainer>
                     

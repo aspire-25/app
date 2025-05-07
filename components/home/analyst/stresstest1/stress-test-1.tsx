@@ -86,22 +86,26 @@ const StressTest1 = () => {
                 </div>
 
                 <TabsContent value="table">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="text-base">
-                                <TableHead className="text-center">Year</TableHead>
-                                <TableHead className="text-center">🔽 in revenues</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {years.map((item, index) => (
-                            <TableRow key={item} className="text-sm text-center">
-                                <TableCell>{item}</TableCell>
-                                <TableCell className="font-bold text-amber-900">${stDiffs[index].toFixed(0)}</TableCell>
-                            </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                    <div className="w-[50%]">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="text-base">
+                                    <TableHead className="text-center">Year</TableHead>
+                                    <TableHead className="text-center">🔽 in revenues</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {years.map((item, index) => (
+                                <TableRow key={item} className="text-sm text-center">
+                                    <TableCell>{item}</TableCell>
+                                    <TableCell className="font-bold text-amber-900">${stDiffs[index].toFixed(0)}</TableCell>
+                                </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+
+                    </div>
+                    
                 </TabsContent>
 
                 <ResponsiveContainer width = "95%" height={window.innerHeight *0.35}>
