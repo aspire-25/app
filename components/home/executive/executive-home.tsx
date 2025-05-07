@@ -2,8 +2,8 @@
 
 'use client';
 
-import React, {useState, useEffect} from "react";
-import {CartesianGrid, Label, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import React, { useState, useEffect } from "react";
+import { CartesianGrid, Label, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 const ExecutiveHome: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>("Stress Test Results");
@@ -23,7 +23,7 @@ const ExecutiveHome: React.FC = () => {
     "Balance Sheet": ["Total Current Assets", "Total Long-Term Asset", "Total Assets", "Total Current Liabilities", "Total Long-Term Liabilities",
       "Total Liabilities", "Total Stockholder's Equity", "Total Liabilities and Equity"]
   };
-  
+
   const [stressToggles, setStressToggles] = useState<boolean[]>(Array(5).fill(false));
   const [incomeToggles, setIncomeToggles] = useState<Record<string, boolean>>(
     Object.fromEntries(optionsMap["Income Statement"].map(option => [option, false]))
@@ -69,7 +69,7 @@ const ExecutiveHome: React.FC = () => {
               ></div>
             </div>
           </div>
-          
+
           {toggles[option] && (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData[option] || []} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
@@ -363,112 +363,110 @@ const ExecutiveHome: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="flex-1 p-4">
-        <div className="flex gap-2 mt-4 items-center">
-          {/* Section buttons */}
-          <div className="flex gap-2 flex-grow">
-            {sections.map((section) => (
-              <button
-                key={section}
-                onClick={() => setActiveSection(section)}
-                className={`px-4 py-2 border rounded 
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="flex gap-2 mt-4 items-center">
+        {/* Section buttons */}
+        <div className="flex gap-2 flex-grow">
+          {sections.map((section) => (
+            <button
+              key={section}
+              onClick={() => setActiveSection(section)}
+              className={`px-4 py-2 border rounded 
                 ${activeSection === section ? "bg-gray-300" : "bg-white"} 
                 ${activeSection !== section ? "hover:bg-blue-200" : ""}`}>
-                {section}
-              </button>
+              {section}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Dynamic Content Based on Active Section */}
+      <div className="mt-4 p-4 bg-white rounded shadow-md">
+        {activeSection === "Stress Test Results" ? (
+          <div className="space-y-4">
+            {stressToggles.map((isOn, index) => (
+              <div key={index}>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold">Stress Test #{index + 1}</h3>
+                  <div
+                    className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
+                      ${isOn ? "bg-green-500" : "bg-gray-300"}`}
+                    onClick={() => toggleStressSwitch(index)}
+                  >
+                    <div
+                      className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300
+                        ${isOn ? "translate-x-6" : "translate-x-0"}`}
+                    ></div>
+                  </div>
+                </div>
+                {/*Stress Test Description*/}
+                <p className="mt-2 text-gray-700">{stressTestDesc[index]}</p>
+
+                {/*Graph Placeholder - only shows if toggle is on*/}
+                {isOn && (
+                  <div className="mt-2 p-4 border rounded bg-gray-100">
+                    {/* <p className="text-gray-600">📊 Graph Placeholder for Stress Test #{index + 1}</p> */}
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart
+                        data={chartData["Stress Tests"] || []} // Use real data if available
+                        margin={{ top: 20, right: 20, bottom: 30, left: 60 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="year" tickMargin={10}>
+                          <Label value="Year" offset={-30} position="insideBottom" />
+                        </XAxis>
+                        <YAxis
+                          tickMargin={10}
+                          // Dynamically set the domain to range from the rounded lower tick to the rounded upper tick
+                          domain={['auto', (dataMax: number) => {
+                            // Step 1: Round the dataMax to the nearest 500 or 1000 (or your preferred value)
+                            // Round up to the next multiple of 500
+                            return Math.ceil(dataMax / 500) * 500;
+                          }]}
+                          tickFormatter={(tick) => {
+                            // Step 2: Round the tick value to the nearest 500 for cleaner ticks
+                            const roundedTick = Math.round(tick / 500) * 500;
+
+                            // Step 3: Format the tick value with commas and add $ sign
+                            return `$${roundedTick.toLocaleString()}`;
+                          }}
+                        >
+                          <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
+                        </YAxis>
+
+                        <Tooltip content={<CustomTooltip />} />
+                        {/* Render multiple lines for different stress test scenarios */}
+                        <Line type="monotone" dataKey="goodsSoldCost" stroke="#8884d8" strokeWidth={2} name="Principal" />
+                        <Line type="monotone" dataKey="grossProfit" stroke="#82ca9d" strokeWidth={2} name="Stress Effect" />
+                        {/* Add more lines later */}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
-        </div>
-
-        {/* Dynamic Content Based on Active Section */}
-        <div className="mt-4 p-4 bg-white rounded shadow-md">
-          {activeSection === "Stress Test Results" ? (
-            <div className="space-y-4">
-              {stressToggles.map((isOn, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold">Stress Test #{index + 1}</h3>
-                    <div
-                      className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
-                      ${isOn ? "bg-green-500" : "bg-gray-300"}`}
-                      onClick={() => toggleStressSwitch(index)}
-                    >
-                      <div
-                        className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300
-                        ${isOn ? "translate-x-6" : "translate-x-0"}`}
-                      ></div>
-                    </div>
-                  </div>
-                  {/*Stress Test Description*/}
-                  <p className="mt-2 text-gray-700">{stressTestDesc[index]}</p>
-
-                  {/*Graph Placeholder - only shows if toggle is on*/}
-                  {isOn && (
-                    <div className="mt-2 p-4 border rounded bg-gray-100">
-                      {/* <p className="text-gray-600">📊 Graph Placeholder for Stress Test #{index + 1}</p> */}
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart
-                          data={chartData["Stress Tests"] || []} // Use real data if available
-                          margin={{ top: 20, right: 20, bottom: 30, left: 60 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="year" tickMargin={10}>
-                            <Label value="Year" offset={-30} position="insideBottom" />
-                          </XAxis>
-                          <YAxis
-                            tickMargin={10}
-                            // Dynamically set the domain to range from the rounded lower tick to the rounded upper tick
-                            domain={['auto', (dataMax: number) => {
-                              // Step 1: Round the dataMax to the nearest 500 or 1000 (or your preferred value)
-                              // Round up to the next multiple of 500
-                              return Math.ceil(dataMax / 500) * 500;
-                            }]}
-                            tickFormatter={(tick) => {
-                              // Step 2: Round the tick value to the nearest 500 for cleaner ticks
-                              const roundedTick = Math.round(tick / 500) * 500;
-
-                              // Step 3: Format the tick value with commas and add $ sign
-                              return `$${roundedTick.toLocaleString()}`;
-                            }}
-                          >
-                            <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
-                          </YAxis>
-
-                          <Tooltip content={<CustomTooltip />} />
-                          {/* Render multiple lines for different stress test scenarios */}
-                          <Line type="monotone" dataKey="goodsSoldCost" stroke="#8884d8" strokeWidth={2} name="Principal"/>
-                          <Line type="monotone" dataKey="grossProfit" stroke="#82ca9d" strokeWidth={2} name="Stress Effect"/>
-                          {/* Add more lines later */}
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  )}
-                </div>
-              ))}
+        ) : (
+          /* Sustainability Model section */
+          <div className="p-5 border rounded bg-gray-100">
+            {/* Income Statement Section */}
+            <div className="space-y-6">
+              {renderChartSection("Income Statement", optionsMap["Income Statement"], incomeToggles, setIncomeToggles)}
             </div>
-          ) : (
-            /* Sustainability Model section */
-            <div className="p-5 border rounded bg-gray-100">
-              {/* Income Statement Section */}
-              <div className="space-y-6">
-                {renderChartSection("Income Statement", optionsMap["Income Statement"], incomeToggles, setIncomeToggles)}
-              </div>
 
-              {/* White spacer */}
-              <div className="-mx-5 my-16 bg-white h-12 w-auto"></div>
+            {/* White spacer */}
+            <div className="-mx-5 my-16 bg-white h-12 w-auto"></div>
 
 
-              {/* Balance Sheet Section */}
-              <div className="pt-5 border-t border-gray-200">
-                {renderChartSection("Balance Sheet", optionsMap["Balance Sheet"], balanceToggles, setBalanceToggles)}
-              </div>
+            {/* Balance Sheet Section */}
+            <div className="pt-5 border-t border-gray-200">
+              {renderChartSection("Balance Sheet", optionsMap["Balance Sheet"], balanceToggles, setBalanceToggles)}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
-};
+}
 
 export default ExecutiveHome;

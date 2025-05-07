@@ -1,24 +1,12 @@
-import AppSidebar from "@/components/sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 import SpireHeader from "@/components/spire-header";
 
 const Home = async () => {
     return (
         <SidebarProvider>
-            <AppSidebar />
             <SidebarInset>
             <SpireHeader />
             <div className="flex flex-1 flex-col gap-4 p-4">
