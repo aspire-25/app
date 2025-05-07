@@ -28,6 +28,9 @@ const ExecutiveHome: React.FC = () => {
 
   // State for chart data
   const [chartData, setChartData] = useState<Record<string, any[]>>({});
+  const [forecastTypes, setForecastTypes] = useState<{ [key: string]: 'average' | 'multiplier' }>({});
+  const [multipliers, setMultipliers] = useState<{ [key: string]: number }>({});
+  const [showForecast, setShowForecast] = useState<boolean>(true);
 
   // Helper function to calculate percentages
   const calculatePercentage = (value: number, total: number) => {
@@ -37,34 +40,229 @@ const ExecutiveHome: React.FC = () => {
   // Helper function to render chart sections
   const renderChartSection = (title: string, options: string[]) => (
     <div className="mt-6">
-      <h3 className="text-xl font-bold mb-4 text-center">{title}</h3>
-      {options.map((option) => (
-        <div key={option}>
-          <h4 className="text-lg font-semibold">{option}</h4>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData[option] || []} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="year" tickMargin={10}>
-                <Label value="Year" offset={-30} position="insideBottom" />
-              </XAxis>
-              <YAxis tickMargin={10} domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}>
-                <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
-              </YAxis>
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-bold text-center">{title}</h3>
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Show Forecast</span>
+          <div
+            className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
+              ${showForecast ? "bg-green-500" : "bg-gray-300"}`}
+            onClick={toggleForecast}
+          >
+            <div
+              className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300
+                ${showForecast ? "translate-x-6" : "translate-x-0"}`}
+            ></div>
+          </div>
         </div>
-      ))}
+      </div>
+      
+      {options.map((option) => {
+        // Filter data based on forecast toggle
+        const chartDataForOption = chartData[option] || [];
+        const filteredData = showForecast 
+          ? chartDataForOption 
+          : chartDataForOption.filter(item => !item.isForecast);
+        
+        return (
+          <div key={option} className="mb-8">
+            <div className="flex justify-between items-center">
+              <h4 className="text-lg font-semibold">{option}</h4>
+              {showForecast && (
+                <div className="flex items-center gap-2">
+                  <label className="text-sm">Forecast Type:</label>
+                  <select
+                    value={forecastTypes[option] || 'average'}
+                    onChange={(e) => handleForecastTypeChange(option, e.target.value as 'average' | 'multiplier')}
+                    className="bg-white p-1 border rounded text-sm"
+                  >
+                    <option value="average">Average</option>
+                    <option value="multiplier">Multiplier</option>
+                  </select>
+                  
+                  {(forecastTypes[option] || 'average') === 'multiplier' && (
+                    <div className="flex items-center gap-1">
+                      <label className="text-sm">%:</label>
+                      <input
+                        type="number"
+                        value={multipliers[option] !== undefined ? multipliers[option] : 1.5}
+                        onChange={(e) => handleMultiplierChange(option, e.target.value)}
+                        className="w-16 p-1 border rounded text-sm"
+                        min="0" step="0.1"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={filteredData} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="year" tickMargin={10}>
+                  <Label value="Year" offset={-30} position="insideBottom" />
+                </XAxis>
+                <YAxis tickMargin={10} domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}>
+                  <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
+                </YAxis>
+                <Tooltip content={<CustomTooltip />} />
+                {/* Split into two lines - one for historical data and one for forecast data */}
+                <Line 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="#8884d8" 
+                  strokeWidth={2}
+                  name="Historical"
+                  dot={{ fill: '#8884d8', r: 4 }}
+                  connectNulls={true}
+                  isAnimationActive={true}
+                  data={filteredData.filter(item => !item.isForecast)}
+                />
+                
+                {showForecast && (
+                  <Line 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke="#82ca9d" 
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    name="Forecast"
+                    dot={{ fill: '#82ca9d', r: 4 }}
+                    connectNulls={true}
+                    isAnimationActive={true}
+                    data={filteredData.filter(item => item.isForecast)}
+                  />
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        );
+      })}
     </div>
   );
 
+  // Handle forecast type change
+  const handleForecastTypeChange = (label: string, type: 'average' | 'multiplier') => {
+    setForecastTypes((prevState) => ({
+      ...prevState,
+      [label]: type,
+    }));
+  };
+
+  // Handle multiplier change
+  const handleMultiplierChange = (label: string, value: string) => {
+    const numericValue = parseFloat(value);
+    if (!isNaN(numericValue)) {
+      setMultipliers((prevState) => ({
+        ...prevState,
+        [label]: numericValue,
+      }));
+    }
+  };
+
+  // Toggle forecast display
+  const toggleForecast = () => {
+    setShowForecast(!showForecast);
+  };
+
+  // Store raw data for regenerating forecasts
+  const [rawMetricData, setRawMetricData] = useState<Record<string, any[]>>({});
+  
+  // Generate forecast data based on current settings
+  useEffect(() => {
+    if (Object.keys(rawMetricData).length === 0) return;
+    
+    const processedChartData: Record<string, any[]> = {};
+    
+    // Process Income Statement metrics
+    processedChartData["Net Sales"] = generateForecastData(rawMetricData["Net Sales"], "Net Sales");
+    processedChartData["Cost of Goods Sold"] = generateForecastData(rawMetricData["Cost of Goods Sold"], "Cost of Goods Sold");
+    processedChartData["Gross margin %"] = generateForecastData(rawMetricData["Gross margin %"], "Gross margin %");
+    processedChartData["Total Operating Expenses"] = generateForecastData(rawMetricData["Total Operating Expenses"], "Total Operating Expenses");
+    processedChartData["Operating Expenses %"] = generateForecastData(rawMetricData["Operating Expenses %"], "Operating Expenses %");
+    processedChartData["Profit (Loss) from Operations %"] = generateForecastData(rawMetricData["Profit (Loss) from Operations %"], "Profit (Loss) from Operations %");
+    processedChartData["Total Other Income (Expense) %"] = generateForecastData(rawMetricData["Total Other Income (Expense) %"], "Total Other Income (Expense) %");
+    processedChartData["Income (Loss) Before Income Taxes"] = generateForecastData(rawMetricData["Income (Loss) Before Income Taxes"], "Income (Loss) Before Income Taxes");
+    processedChartData["Pre-Tax Income %"] = generateForecastData(rawMetricData["Pre-Tax Income %"], "Pre-Tax Income %");
+    processedChartData["Net Income (Loss)"] = generateForecastData(rawMetricData["Net Income (Loss)"], "Net Income (Loss)");
+    processedChartData["Net Income (Loss) %"] = generateForecastData(rawMetricData["Net Income (Loss) %"], "Net Income (Loss) %");
+    
+    // Process Balance Sheet metrics
+    processedChartData["Total Current Assets"] = generateForecastData(rawMetricData["Total Current Assets"], "Total Current Assets");
+    processedChartData["Total Long-Term Asset"] = generateForecastData(rawMetricData["Total Long-Term Asset"], "Total Long-Term Asset");
+    processedChartData["Total Assets"] = generateForecastData(rawMetricData["Total Assets"], "Total Assets");
+    processedChartData["Total Current Liabilities"] = generateForecastData(rawMetricData["Total Current Liabilities"], "Total Current Liabilities");
+    processedChartData["Total Long-Term Liabilities"] = generateForecastData(rawMetricData["Total Long-Term Liabilities"], "Total Long-Term Liabilities");
+    processedChartData["Total Liabilities"] = generateForecastData(rawMetricData["Total Liabilities"], "Total Liabilities");
+    processedChartData["Total Stockholder's Equity"] = generateForecastData(rawMetricData["Total Stockholder's Equity"], "Total Stockholder's Equity");
+    processedChartData["Total Liabilities and Equity"] = generateForecastData(rawMetricData["Total Liabilities and Equity"], "Total Liabilities and Equity");
+    
+    // Add stress test data
+    if (chartData["Stress Tests"]) {
+      processedChartData["Stress Tests"] = chartData["Stress Tests"];
+    }
+    
+    setChartData(processedChartData);
+  }, [forecastTypes, multipliers, rawMetricData, chartData["Stress Tests"]]);
+
+  // Helper function to generate forecast data
+  const generateForecastData = (metricData: any[], metricName: string) => {
+    if (!metricData || metricData.length === 0) return [];
+    
+    // Default forecast settings if not set
+    const forecastType = forecastTypes[metricName] || 'average';
+    const multiplierValue = multipliers[metricName] !== undefined ? multipliers[metricName] : 1.5;
+    
+    // Clone the existing data
+    const existingData = metricData.filter(item => !item.isForecast);
+    
+    // Get the last year and extract the year number
+    const lastDataPoint = existingData[existingData.length - 1];
+    const lastYear = parseInt(lastDataPoint.year, 10);
+    
+    // Generate 5 years of forecast data
+    const forecastData = [];
+    for (let i = 1; i <= 5; i++) {
+      const forecastYear = (lastYear + i).toString();
+      let forecastValue: number;
+      
+      if (forecastType === 'average') {
+        // Calculate average of last 3 years if available
+        const lastThreeValues = existingData.slice(-3).map(item => item.value);
+        if (lastThreeValues.length === 3) {
+          forecastValue = lastThreeValues.reduce((sum, val) => sum + val, 0) / 3;
+        } else {
+          // If less than 3 years of data, use the last value
+          forecastValue = lastDataPoint.value;
+        }
+      } else {
+        // Use multiplier: previous value + (previous value * multiplier/100)
+        const prevValue = i === 1 ? lastDataPoint.value : forecastData[i - 2].value;
+        forecastValue = prevValue + (prevValue * (multiplierValue / 100));
+      }
+      
+      forecastData.push({
+        year: forecastYear,
+        value: forecastValue,
+        isForecast: true // Flag to identify forecast data points
+      });
+    }
+    
+    // Add isForecast: false flag to existing data
+    const markedExistingData = existingData.map(item => ({
+      ...item,
+      isForecast: false
+    }));
+    
+    // Return combined data
+    return [...markedExistingData, ...forecastData];
+  };
+  
   // Fetch financial data from API
   useEffect(() => {
     const fetchFinancialData = async () => {
       try {
         // Fetch financial data
-
         const response = await fetch('/api/financials', {
           method: 'GET',
           cache: 'no-store'
@@ -190,30 +388,36 @@ const ExecutiveHome: React.FC = () => {
           };
           
           // Process data for each metric in optionsMap
-          const processedChartData: Record<string, any[]> = {};
+          const rawData: Record<string, any[]> = {};
           
           // Process Income Statement metrics
-          processedChartData["Net Sales"] = processMetric("netSales");
-          processedChartData["Cost of Goods Sold"] = processMetric("costOfGoodsSold");
-          processedChartData["Gross margin %"] = processMetric("grossMargin", true);
-          processedChartData["Total Operating Expenses"] = processMetric("totalOperatingExpenses");
-          processedChartData["Operating Expenses %"] = processMetric("operatingExpenses", true);
-          processedChartData["Profit (Loss) from Operations %"] = processMetric("profitFromOperationsMargin", true);
-          processedChartData["Total Other Income (Expense) %"] = processMetric("totalOtherIncomeMargin", true);
-          processedChartData["Income (Loss) Before Income Taxes"] = processMetric("incomeBeforeTax");
-          processedChartData["Pre-Tax Income %"] = processMetric("incomeBeforeTaxMargin", true);
-          processedChartData["Net Income (Loss)"] = processMetric("netIncome");
-          processedChartData["Net Income (Loss) %"] = processMetric("netIncomeMargin", true);
+          rawData["Net Sales"] = processMetric("netSales");
+          rawData["Cost of Goods Sold"] = processMetric("costOfGoodsSold");
+          rawData["Gross margin %"] = processMetric("grossMargin", true);
+          rawData["Total Operating Expenses"] = processMetric("totalOperatingExpenses");
+          rawData["Operating Expenses %"] = processMetric("operatingExpenses", true);
+          rawData["Profit (Loss) from Operations %"] = processMetric("profitFromOperationsMargin", true);
+          rawData["Total Other Income (Expense) %"] = processMetric("totalOtherIncomeMargin", true);
+          rawData["Income (Loss) Before Income Taxes"] = processMetric("incomeBeforeTax");
+          rawData["Pre-Tax Income %"] = processMetric("incomeBeforeTaxMargin", true);
+          rawData["Net Income (Loss)"] = processMetric("netIncome");
+          rawData["Net Income (Loss) %"] = processMetric("netIncomeMargin", true);
           
           // Process Balance Sheet metrics
-          processedChartData["Total Current Assets"] = processMetric("totalCurrentAssets");
-          processedChartData["Total Long-Term Asset"] = processMetric("totalLongTermAssets");
-          processedChartData["Total Assets"] = processMetric("totalAssets");
-          processedChartData["Total Current Liabilities"] = processMetric("totalCurrentLiabilities");
-          processedChartData["Total Long-Term Liabilities"] = processMetric("totalLongTermLiabilities");
-          processedChartData["Total Liabilities"] = processMetric("totalLiabilities");
-          processedChartData["Total Stockholder's Equity"] = processMetric("totalStockholdersEquity");
-          processedChartData["Total Liabilities and Equity"] = processMetric("totalLiabilitiesAndEquity");
+          rawData["Total Current Assets"] = processMetric("totalCurrentAssets");
+          rawData["Total Long-Term Asset"] = processMetric("totalLongTermAssets");
+          rawData["Total Assets"] = processMetric("totalAssets");
+          rawData["Total Current Liabilities"] = processMetric("totalCurrentLiabilities");
+          rawData["Total Long-Term Liabilities"] = processMetric("totalLongTermLiabilities");
+          rawData["Total Liabilities"] = processMetric("totalLiabilities");
+          rawData["Total Stockholder's Equity"] = processMetric("totalStockholdersEquity");
+          rawData["Total Liabilities and Equity"] = processMetric("totalLiabilitiesAndEquity");
+          
+          // Store raw data for regenerating forecasts
+          setRawMetricData(rawData);
+          
+          // Add stress test data (using sample data for now)
+          const processedChartData: Record<string, any[]> = {};
         
           
           // Add stress test data (using sample data for now)
@@ -377,12 +581,17 @@ const ExecutiveHome: React.FC = () => {
           </div>
         ) : (
           /* Sustainability Model section */
-          <div className="p-5 border rounded bg-gray-100">
-            <div className="space-y-6">
-              {/* Render Income Statement Section */}
+          <div className="space-y-6">
+            {/* Render Income Statement Section */}
+            <div className="p-5 border rounded bg-gray-100">
               {renderChartSection("Income Statement", optionsMap["Income Statement"])}
-              
-              {/* Render Balance Sheet Section */}
+            </div>
+            
+            {/* White space between sections */}
+            <div className="h-6"></div>
+            
+            {/* Render Balance Sheet Section */}
+            <div className="p-5 border rounded bg-gray-100">
               {renderChartSection("Balance Sheet", optionsMap["Balance Sheet"])}
             </div>
           </div>
