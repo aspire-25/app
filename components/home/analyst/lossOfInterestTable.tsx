@@ -6,7 +6,7 @@ import {
     TableHeader,
     TableRow,
   } from "@/components/ui/table"
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -55,12 +55,15 @@ const LossOfInterestTable: React.FC<ChildProps> = ({ principalData }) => {
 
     return(
         <>
+            <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Loss of Interest table</div>
             <Tabs defaultValue="table" className="w-full h-auto">
-                <p className="text-lg">Show as:</p>
-                <TabsList className="grid w-1/5 h-auto grid-cols-2 text-base">
-                    <TabsTrigger value="table" className="text-base text-balance">Table</TabsTrigger>
-                    <TabsTrigger value="chart" className="text-base text-balance">Chart</TabsTrigger>
-                </TabsList>
+                <div className="flex">
+                    <p className="text-lg mt-auto mb-auto">Show as:</p>
+                    <TabsList className="grid w-1/5 h-auto grid-cols-2 text-base ml-4">
+                        <TabsTrigger value="table" className="text-base text-balance text-2xl">Table</TabsTrigger>
+                        <TabsTrigger value="chart" className="text-base text-balance text-2xl">Chart</TabsTrigger>
+                    </TabsList>
+                </div>
 
                 <TabsContent value="table">
                     {/* display the table */}
@@ -124,29 +127,21 @@ const LossOfInterestTable: React.FC<ChildProps> = ({ principalData }) => {
                 </TabsContent>
 
                 <TabsContent value="chart">
-                    <Select>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue defaultValue="Principal" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem value="Principal" onSelect={()=> setVarToDisplay("principal")}>Principal</SelectItem>
+                    <p className="text-2xl text-center pb-[1%]">Principal & Loss of Interest [yearly]</p>
+                    <ResponsiveContainer width = "95%" height={window.innerHeight *0.5}>
+                        
+                        <LineChart  data={convertIncomingToChart()} margin={{ top: 5, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="6 6" />
+                            <XAxis dataKey="name" />
+                            <YAxis orientation="left"/>
+                            <Tooltip separator=": $"/>
+                            <Legend />
+                            <Line type="monotone" dataKey="principal" stroke="goldenrod" strokeWidth={3}/>
+                            <Line type="monotone" dataKey="loss_of_interest" stroke="red" strokeWidth={3}/>
+                        </LineChart>
 
-                                <SelectItem value="Loss of Interest" onSelect={()=> setVarToDisplay("loss")}>Loss of Interest</SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
+                    </ResponsiveContainer>
                     
-                    <LineChart width={1000} height={window.innerHeight *0.6} data={convertIncomingToChart()}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="6 6" />
-                        <XAxis dataKey="name" />
-                        <YAxis orientation="left"/>
-                        <Tooltip separator=": $"/>
-                        <Legend />
-                        <Line type="monotone" dataKey="principal" stroke="goldenrod" strokeWidth={3}/>
-                        <Line type="monotone" dataKey="loss_of_interest" stroke="red" strokeWidth={3}/>
-                    </LineChart>
 
                 </TabsContent>
             </Tabs>

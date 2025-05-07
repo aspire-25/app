@@ -10,6 +10,9 @@ import {
     TableHeader,
     TableRow,
   } from "@/components/ui/table"
+  import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type ChildProps = {
     onParamsUpdate: (data: Array<number>) => void; // The function to send data back to the parent
@@ -32,6 +35,12 @@ const StressTest5Input: React.FC<ChildProps> = ({ onParamsUpdate, version, intrD
     } else {
         defaults.interestRate = 1.7
     }
+
+    const convertCamelCaseToNormal = (text: String) => {
+        return (text.replace(/[A-Z]/g, letter => ` ${letter}`))[0].toUpperCase() + (text.replace(/[A-Z]/g, letter => ` ${letter}`)).slice(1)
+    }
+
+    const [chartVar, setChartVar] = useState("")
 
     const generateTableData = (presentValue: number, interestRate: number, term: number, reinvestedInterest: number) => {
         const data = []
@@ -68,9 +77,10 @@ const StressTest5Input: React.FC<ChildProps> = ({ onParamsUpdate, version, intrD
                 totalPaidOnLoan = interestEarned - loanPayment
             }
 
+            const yr = new Date().getFullYear()
 
             data.push({
-                year: i+1,
+                year: i+1+yr,
                 balance: calculatedBalance,
                 interestEarned: interestEarned,
                 interestAndBalance: interestAndBalance,
@@ -227,39 +237,85 @@ const StressTest5Input: React.FC<ChildProps> = ({ onParamsUpdate, version, intrD
             {/* for the chart */}
 
             <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Loan Calculator Tab 5{version}</div>
-            <div className="overflow-y-auto" >
-                <Table>
-                    <TableHeader>
-                        <TableRow className="text-base">
-                            {Object.keys(tableData[0]).map((key) => (
-                                /* convert the camelCase keys into "proper" table headings. */
-                                <TableHead className="text-center" key={key}>{(key.replace(/[A-Z]/g, letter => ` ${letter}`))[0].toUpperCase() + (key.replace(/[A-Z]/g, letter => ` ${letter}`)).slice(1)}</TableHead>
-                            ))}
-                        </TableRow>
-                    </TableHeader>
-                    
-                    {/* table body */}
-                    <TableBody>
-                        {tableData.map((item) => (
-                            <TableRow key={item.year} className="text-sm text-center">
-                                {Object.keys(item).map((rowKey) => (
-                                    // dumb TypeScript makes me put "item[rowKey as keyof typeof item]" instead of simply "item[rowKey]" 💀
 
-                                    (rowKey == "year" ? (
-                                        <TableCell key={rowKey} className="text-base font-bold">{Math.round(item.year)}</TableCell>
-                                    ) : (
-                                        (Math.round(item[rowKey as keyof typeof item]) >= 0) ? 
-                                        (<TableCell key={rowKey}>${Math.round(item[rowKey as keyof typeof item])}</TableCell>) : 
-                                        (<TableCell key={rowKey} className="text-red-900">(${0-Math.round(item[rowKey as keyof typeof item])}) <sup>[neg]</sup></TableCell>)
-                                    ))
-                                    
+             <Tabs defaultValue="table" className="w-full h-auto">
+                <div className="flex">
+                    <p className="text-lg mt-auto mb-auto">Show as:</p>
+                    <TabsList className="grid w-1/5 h-auto grid-cols-2 text-base ml-4">
+                        <TabsTrigger value="table" className="text-2lg text-balance">Table</TabsTrigger>
+                        <TabsTrigger value="chart" className="text-2lg text-balance">Chart</TabsTrigger>
+                    </TabsList>
+                </div>
+
+                <TabsContent value="table">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="text-base">
+                                {Object.keys(tableData[0]).map((key) => (
+                                    /* convert the camelCase keys into "proper" table headings. */
+                                    <TableHead className="text-center" key={key}>{(key.replace(/[A-Z]/g, letter => ` ${letter}`))[0].toUpperCase() + (key.replace(/[A-Z]/g, letter => ` ${letter}`)).slice(1)}</TableHead>
                                 ))}
                             </TableRow>
-                        ))}
-                    </TableBody>
+                        </TableHeader>
+                        
+                        {/* table body */}
+                        <TableBody>
+                            {tableData.map((item) => (
+                                <TableRow key={item.year} className="text-sm text-center">
+                                    {Object.keys(item).map((rowKey) => (
+                                        // dumb TypeScript makes me put "item[rowKey as keyof typeof item]" instead of simply "item[rowKey]" 💀
+
+                                        (rowKey == "year" ? (
+                                            <TableCell key={rowKey} className="text-base font-bold">{Math.round(item.year)}</TableCell>
+                                        ) : (
+                                            (Math.round(item[rowKey as keyof typeof item]) >= 0) ? 
+                                            (<TableCell key={rowKey}>${Math.round(item[rowKey as keyof typeof item])}</TableCell>) : 
+                                            (<TableCell key={rowKey} className="text-red-900">(${0-Math.round(item[rowKey as keyof typeof item])}) <sup>[neg]</sup></TableCell>)
+                                        ))
+                                        
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TabsContent>
+                
+                <TabsContent value="chart" className="w-full">
+                    <br/>
+                        <div className="flex w-[100%] justify-end">
+                            <div className="w-[70%] pl-[5%]">
+                                {chartVar != "" ? (<b className="text-2xl">{convertCamelCaseToNormal(chartVar)} over time [yearly]</b>) : (<b className="text-2xl">Please select a variable --&gt;</b>)}
+                            </div>
+                            
+                            <div className="w-[30%]">
+                                <Select onValueChange={setChartVar} value={chartVar} >
+                                    <SelectTrigger className="w-[250px] text-base">
+                                        <SelectValue placeholder="Select a variable..." defaultValue={"beginningBalance"} className="text-base"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.keys(tableData[0]).slice(2).map((item, index) => (
+                                            <SelectItem value={item} key={index} className="text-base">{convertCamelCaseToNormal(item)}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            
+                        </div>
+                    <br/>
+                    <ResponsiveContainer width="100%" height={window.innerHeight *0.5}>
+                        <LineChart data={tableData}
+                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="6 6" />
+                                <XAxis dataKey="year" />
+                                <YAxis orientation="left"/>
+                                <Tooltip separator=": $"/>
+                                <Line type="basis" dataKey={chartVar} stroke="black" strokeWidth={3}/>
+                        </LineChart>
+                    </ResponsiveContainer>
                     
-                </Table>
-            </div>
+                </TabsContent>
+                
+            </Tabs>
         </div>
     )
 }
