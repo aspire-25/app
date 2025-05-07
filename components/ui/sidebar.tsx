@@ -263,15 +263,24 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, state } = useSidebar()
 
+  // Position: left-0 when collapsed, left-[--sidebar-width] when expanded
+  // Center vertically with top-1/2 and -translate-y-1/2
+  // Use z-50 to ensure it's above other content
   return (
     <Button
       ref={ref}
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn(
+        "fixed z-50 top-1/2 -translate-y-1/2 transition-all",
+        state === "collapsed"
+          ? "left-0"
+          : "left-[var(--sidebar-width)]",
+        className
+      )}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
