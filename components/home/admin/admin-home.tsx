@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -163,6 +162,7 @@ export default function UsersPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+
       {/* Main Content */}
       <main className="flex-1 container mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
