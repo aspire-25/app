@@ -456,10 +456,11 @@ const ExecutiveHome: React.FC = () => {
               </div>
 
               {/* White spacer */}
-              <div className="my-16 bg-white h-12 rounded"></div>
+              <div className="-mx-5 my-16 bg-white h-12 w-auto"></div>
+
 
               {/* Balance Sheet Section */}
-              <div className="pt-8 border-t border-gray-200">
+              <div className="pt-5 border-t border-gray-200">
                 {renderChartSection("Balance Sheet", optionsMap["Balance Sheet"], balanceToggles, setBalanceToggles)}
               </div>
             </div>
