@@ -31,17 +31,28 @@ const ExecutiveHome: React.FC = () => {
   const [forecastTypes, setForecastTypes] = useState<{ [key: string]: 'average' | 'multiplier' }>({});
   const [multipliers, setMultipliers] = useState<{ [key: string]: number }>({});
   const [showForecast, setShowForecast] = useState<boolean>(true);
+  // State to track which graphs are visible in sustainability model
+  const [visibleGraphs, setVisibleGraphs] = useState<{ [key: string]: boolean }>({});
 
   // Helper function to calculate percentages
   const calculatePercentage = (value: number, total: number) => {
     return total > 0 ? (value / total * 100).toFixed(2) + "%" : "0%";
   };
 
+  // Helper function to toggle graph visibility
+  const toggleGraph = (option: string) => {
+    setVisibleGraphs(prev => ({
+      ...prev,
+      [option]: !prev[option]
+    }));
+  };
+
   // Helper function to render chart sections
   const renderChartSection = (title: string, options: string[]) => (
     <div className="mt-6">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-center items-center mb-4">
         <h3 className="text-xl font-bold text-center">{title}</h3>
+        <div className="flex-grow"></div>
         <div className="flex items-center gap-2">
           <span className="text-sm">Show Forecast</span>
           <div
@@ -58,6 +69,14 @@ const ExecutiveHome: React.FC = () => {
       </div>
       
       {options.map((option) => {
+        // Initialize visibility state if not set
+        if (visibleGraphs[option] === undefined) {
+          setVisibleGraphs(prev => ({
+            ...prev,
+            [option]: true // Default to visible
+          }));
+        }
+        
         // Filter data based on forecast toggle
         const chartDataForOption = chartData[option] || [];
         const filteredData = showForecast 
@@ -67,7 +86,19 @@ const ExecutiveHome: React.FC = () => {
         return (
           <div key={option} className="mb-8">
             <div className="flex justify-between items-center">
-              <h4 className="text-lg font-semibold">{option}</h4>
+              <div className="flex items-center gap-3">
+                <h4 className="text-lg font-semibold">{option}</h4>
+                <div
+                  className={`w-12 h-7 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
+                    ${visibleGraphs[option] ? "bg-green-500" : "bg-gray-300"}`}
+                  onClick={() => toggleGraph(option)}
+                >
+                  <div
+                    className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-all duration-300
+                      ${visibleGraphs[option] ? "translate-x-5" : "translate-x-0"}`}
+                  ></div>
+                </div>
+              </div>
               {showForecast && (
                 <div className="flex items-center gap-2">
                   <label className="text-sm">Forecast Type:</label>
@@ -80,82 +111,83 @@ const ExecutiveHome: React.FC = () => {
                     <option value="multiplier">Multiplier</option>
                   </select>
                   
-                  {(forecastTypes[option] || 'average') === 'multiplier' && (
-                    <div className="flex items-center gap-1">
-                      <label className="text-sm">%:</label>
-                      <input
-                        type="number"
-                        value={multipliers[option] !== undefined ? multipliers[option] : 1.5}
-                        onChange={(e) => handleMultiplierChange(option, e.target.value)}
-                        className="w-16 p-1 border rounded text-sm"
-                        min="0" step="0.1"
-                      />
-                    </div>
-                  )}
+                  <div className="flex items-center gap-1 ml-2">
+                    <label className="text-sm">Multiplier:</label>
+                    <span className="text-sm font-medium">
+                      {(forecastTypes[option] || 'average') === 'multiplier' 
+                        ? (multipliers[option] !== undefined ? multipliers[option] : 1.5) 
+                        : 1.0}%
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
             
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={filteredData} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" tickMargin={10}>
-                  <Label value="Year" offset={-30} position="insideBottom" />
-                </XAxis>
-                <YAxis tickMargin={10} domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}>
-                  <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
-                </YAxis>
-                <Tooltip content={<CustomTooltip />} />
-                {/* Split into two lines - one for historical data and one for forecast data */}
-                <Line 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke="#8884d8" 
-                  strokeWidth={2}
-                  name="Historical"
-                  dot={{ fill: '#8884d8', r: 4 }}
-                  connectNulls={true}
-                  isAnimationActive={true}
-                  data={filteredData.filter(item => !item.isForecast)}
-                />
-                
-                {showForecast && (
+            {visibleGraphs[option] && (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={filteredData} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="year" 
+                    tickMargin={10}
+                    domain={['dataMin', 'dataMax']}
+                    type="category"
+                    allowDataOverflow={false}
+                  >
+                    <Label value="Year" offset={-30} position="insideBottom" />
+                  </XAxis>
+                  <YAxis tickMargin={10} domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}>
+                    <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
+                  </YAxis>
+                  <Tooltip content={<CustomTooltip />} />
+                  {/* Split into two lines - one for historical data and one for forecast data */}
                   <Line 
                     type="monotone" 
                     dataKey="value" 
-                    stroke="#82ca9d" 
+                    stroke="#8884d8" 
                     strokeWidth={2}
-                    strokeDasharray="5 5"
-                    name="Forecast"
-                    dot={{ fill: '#82ca9d', r: 4 }}
+                    name="Historical"
+                    dot={{ fill: '#8884d8', r: 4 }}
                     connectNulls={true}
                     isAnimationActive={true}
-                    data={filteredData.filter(item => item.isForecast)}
+                    data={filteredData.filter(item => !item.isForecast)}
                   />
-                )}
-              </LineChart>
-            </ResponsiveContainer>
+                  
+                  {showForecast && (
+                    <Line 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke="#82ca9d" 
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      name="Forecast"
+                      dot={{ fill: '#82ca9d', r: 4 }}
+                      connectNulls={true}
+                      isAnimationActive={true}
+                      data={filteredData.filter(item => item.isForecast)}
+                    />
+                  )}
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         );
       })}
     </div>
   );
 
-  // Handle forecast type change
+  // Handle forecast type change with default multiplier setting
   const handleForecastTypeChange = (label: string, type: 'average' | 'multiplier') => {
     setForecastTypes((prevState) => ({
       ...prevState,
       [label]: type,
     }));
-  };
-
-  // Handle multiplier change
-  const handleMultiplierChange = (label: string, value: string) => {
-    const numericValue = parseFloat(value);
-    if (!isNaN(numericValue)) {
+    
+    // Set default multiplier value if switching to multiplier type
+    if (type === 'multiplier' && multipliers[label] === undefined) {
       setMultipliers((prevState) => ({
         ...prevState,
-        [label]: numericValue,
+        [label]: 1.5,
       }));
     }
   };
@@ -220,10 +252,12 @@ const ExecutiveHome: React.FC = () => {
     const lastDataPoint = existingData[existingData.length - 1];
     const lastYear = parseInt(lastDataPoint.year, 10);
     
-    // Generate 5 years of forecast data
+    // Generate forecast data up to 2029
     const forecastData = [];
-    for (let i = 1; i <= 5; i++) {
-      const forecastYear = (lastYear + i).toString();
+    const targetEndYear = 2029;
+    
+    for (let year = lastYear + 1; year <= targetEndYear; year++) {
+      const forecastYear = year.toString();
       let forecastValue: number;
       
       if (forecastType === 'average') {
@@ -237,7 +271,11 @@ const ExecutiveHome: React.FC = () => {
         }
       } else {
         // Use multiplier: previous value + (previous value * multiplier/100)
-        const prevValue = i === 1 ? lastDataPoint.value : forecastData[i - 2].value;
+        const prevIndex = year - lastYear - 1;
+        const prevValue = prevIndex === 0 ? 
+          lastDataPoint.value : 
+          forecastData[prevIndex - 1].value;
+        
         forecastValue = prevValue + (prevValue * (multiplierValue / 100));
       }
       
@@ -545,7 +583,13 @@ const ExecutiveHome: React.FC = () => {
                         margin={{ top: 20, right: 20, bottom: 30, left: 60 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="year" tickMargin={10}>
+                        <XAxis 
+                          dataKey="year" 
+                          tickMargin={10}
+                          domain={['dataMin', 'dataMax']}
+                          type="category"
+                          allowDataOverflow={false}
+                        >
                           <Label value="Year" offset={-30} position="insideBottom" />
                         </XAxis>
                         <YAxis
