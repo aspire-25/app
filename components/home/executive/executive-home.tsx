@@ -46,8 +46,26 @@ const ExecutiveHome: React.FC = () => {
               <XAxis dataKey="year" tickMargin={10}>
                 <Label value="Year" offset={-30} position="insideBottom" />
               </XAxis>
-              <YAxis tickMargin={10} domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}>
-                <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
+              <YAxis 
+                tickMargin={10} 
+                domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}
+                tickFormatter={(value) => {
+                  // Check if this is a percentage metric
+                  const isPercentage = option.includes('%');
+                  if (isPercentage) {
+                    return `${value}%`;
+                  } else {
+                    // Format with $ and commas
+                    return `$${value.toLocaleString()}`;
+                  }
+                }}
+              >
+                <Label 
+                  value={option.includes('%') ? "% Value" : "Value (in $)"} 
+                  offset={100} 
+                  position="insideRight" 
+                  angle={-90} 
+                />
               </YAxis>
               <Tooltip content={<CustomTooltip />} />
               <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
@@ -336,16 +354,15 @@ const ExecutiveHome: React.FC = () => {
                             tickMargin={10}
                             // Dynamically set the domain to range from the rounded lower tick to the rounded upper tick
                             domain={['auto', (dataMax: number) => {
-                              // Step 1: Round the dataMax to the nearest 500 or 1000 (or your preferred value)
                               // Round up to the next multiple of 500
                               return Math.ceil(dataMax / 500) * 500;
                             }]}
                             tickFormatter={(tick) => {
-                              // Step 2: Round the tick value to the nearest 500 for cleaner ticks
+                              // Round the tick value to the nearest 500 for cleaner ticks
                               const roundedTick = Math.round(tick / 500) * 500;
 
-                              // Step 3: Format the tick value with commas
-                              return roundedTick.toLocaleString();
+                              // Format the tick value with $ and commas
+                              return `$${roundedTick.toLocaleString()}`;
                             }}
                           >
                             <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
@@ -369,6 +386,9 @@ const ExecutiveHome: React.FC = () => {
               <div className="space-y-6">
                 {/* Render Income Statement Section */}
                 {renderChartSection("Income Statement", optionsMap["Income Statement"])}
+
+                {/* White space between sections */}
+                <div className="h-6"></div>
 
                 {/* Render Balance Sheet Section */}
                 {renderChartSection("Balance Sheet", optionsMap["Balance Sheet"])}
