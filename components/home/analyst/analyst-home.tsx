@@ -5,6 +5,8 @@ import StressTest3 from "./stresstest3/stress-test-3"
 import StressTest4 from "./stresstest4/stress-test-4"
 import StressTest5 from "./stresstest5/stress-test-5"
 import TableDivider from "./tableDivider"
+import Image from "next/image"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const AnalystLanding = () => {
     const labels = [
@@ -16,30 +18,33 @@ const AnalystLanding = () => {
     ]
     
     return (
-        <div className="m-5">
-            <Tabs defaultValue="st1" className="w-full h-auto">
-                <TabsList className="grid w-full h-auto grid-cols-5 text-xl">
-                    {labels.map((item, index) => (
-                        <TabsTrigger value={item.val} key={index} className="text-xl">{item.title}</TabsTrigger>
-                    ))} 
-                </TabsList>
-                <TableDivider />
-                {labels.map((item, index) => (
-                    <>
-                        <TabsContent value={item.val} key={index}>
-                            <div className="text-3xl mt-7"><b className="font-bold text-amber-900">{item.title}: {item.description} </b></div>
-                            <br></br>
-                            {(item.title == "Stress Test 1") && <StressTest1 />}
-                            {(item.title == "Stress Test 2") && <StressTest2 />}
-                            {(item.title == "Stress Test 3") && <StressTest3 />}
-                            {(item.title == "Stress Test 4") && <StressTest4 />}
-                            {(item.title == "Stress Test 5") && <StressTest5 />}
-                        </TabsContent>
-                    </>
-                    
-                ))} 
-
-            </Tabs>
+        <div className="min-h-screen flex flex-col">
+            <div className="flex-1">
+                {/* Main Content */}
+                <div className="m-5">
+                    <Tabs defaultValue="st1" className="w-full h-auto">
+                        <TabsList className="grid w-full h-auto grid-cols-5 text-xl">
+                            {labels.map((item, index) => (
+                                <TabsTrigger value={item.val} key={index} className="text-xl">{item.title}</TabsTrigger>
+                            ))} 
+                        </TabsList>
+                        <TableDivider />
+                        {labels.map((item, index) => (
+                            <>
+                                <TabsContent value={item.val} key={index}>
+                                    <div className="text-3xl mt-7"><b className="font-bold text-amber-900">{item.title}: {item.description} </b></div>
+                                    <br></br>
+                                    {(item.title == "Stress Test 1") && <StressTest1 />}
+                                    {(item.title == "Stress Test 2") && <StressTest2 />}
+                                    {(item.title == "Stress Test 3") && <StressTest3 />}
+                                    {(item.title == "Stress Test 4") && <StressTest4 />}
+                                    {(item.title == "Stress Test 5") && <StressTest5 />}
+                                </TabsContent>
+                            </>
+                        ))} 
+                    </Tabs>
+                </div>
+            </div>
         </div>
     )
 }

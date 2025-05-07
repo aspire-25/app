@@ -43,7 +43,7 @@ const StressTest5InputSLC=() => {
         let paymentDate = loanStartDate
 
         // calculate the monthly payment upfront
-        let monthlyPayment = ((interestRate / 1200) * presentValue) / (1 - Math.pow(1+(interestRate / 1200), 0-numPayments))
+        const monthlyPayment = ((interestRate / 1200) * presentValue) / (1 - Math.pow(1+(interestRate / 1200), 0-numPayments))
         for (let i = 0; i < numPayments; i++) {
             if (i > 0) {
                 beginningBalance = data[i-1].endingBalance
