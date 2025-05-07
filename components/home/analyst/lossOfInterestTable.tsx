@@ -55,6 +55,7 @@ const LossOfInterestTable: React.FC<ChildProps> = ({ principalData }) => {
 
     return(
         <>
+            <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Loss of Interest table</div>
             <Tabs defaultValue="table" className="w-full h-auto">
                 <div className="flex">
                     <p className="text-lg mt-auto mb-auto">Show as:</p>
@@ -127,7 +128,7 @@ const LossOfInterestTable: React.FC<ChildProps> = ({ principalData }) => {
 
                 <TabsContent value="chart">
                     <p className="text-2xl text-center pb-[1%]">Principal & Loss of Interest [yearly]</p>
-                    <ResponsiveContainer width = "95%" height={window.innerHeight *0.6}>
+                    <ResponsiveContainer width = "95%" height={window.innerHeight *0.5}>
                         
                         <LineChart  data={convertIncomingToChart()} margin={{ top: 5, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="6 6" />
