@@ -33,6 +33,8 @@ const ExecutiveHome: React.FC = () => {
   const [showForecast, setShowForecast] = useState<boolean>(true);
   // State to track which graphs are visible in sustainability model
   const [visibleGraphs, setVisibleGraphs] = useState<{ [key: string]: boolean }>({});
+  // State for number of forecasted years
+  const [forecastYears, setForecastYears] = useState<number>(5);
 
   // Helper function to calculate percentages
   const calculatePercentage = (value: number, total: number) => {
@@ -53,18 +55,41 @@ const ExecutiveHome: React.FC = () => {
       <div className="flex justify-center items-center mb-4">
         <h3 className="text-xl font-bold text-center">{title}</h3>
         <div className="flex-grow"></div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm">Show Forecast</span>
-          <div
-            className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
-              ${showForecast ? "bg-green-500" : "bg-gray-300"}`}
-            onClick={toggleForecast}
-          >
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">Show Forecast</span>
             <div
-              className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300
-                ${showForecast ? "translate-x-6" : "translate-x-0"}`}
-            ></div>
+              className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
+                ${showForecast ? "bg-green-500" : "bg-gray-300"}`}
+              onClick={toggleForecast}
+            >
+              <div
+                className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300
+                  ${showForecast ? "translate-x-6" : "translate-x-0"}`}
+              ></div>
+            </div>
           </div>
+          
+          {showForecast && (
+            <div className="flex items-center gap-2">
+              <label htmlFor="forecastYears" className="text-sm">Forecast Years:</label>
+              <input
+                id="forecastYears"
+                type="number"
+                min={1}
+                max={10}
+                step={1}
+                value={forecastYears}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  if (!isNaN(value) && value >= 1 && value <= 10) {
+                    setForecastYears(value);
+                  }
+                }}
+                className="border px-2 py-1 rounded w-16 text-sm"
+              />
+            </div>
+          )}
         </div>
       </div>
       
@@ -136,8 +161,26 @@ const ExecutiveHome: React.FC = () => {
                   >
                     <Label value="Year" offset={-30} position="insideBottom" />
                   </XAxis>
-                  <YAxis tickMargin={10} domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}>
-                    <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
+                  <YAxis 
+                    tickMargin={10} 
+                    domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}
+                    tickFormatter={(value) => {
+                      // Check if this is a percentage metric
+                      const isPercentage = option.includes('%');
+                      if (isPercentage) {
+                        return `${value}%`;
+                      } else {
+                        // Format with $ and commas
+                        return `$${value.toLocaleString()}`;
+                      }
+                    }}
+                  >
+                    <Label 
+                      value={option.includes('%') ? "% Value" : "Value (in $)"} 
+                      offset={100} 
+                      position="insideRight" 
+                      angle={-90} 
+                    />
                   </YAxis>
                   <Tooltip content={<CustomTooltip />} />
                   {/* Split into two lines - one for historical data and one for forecast data */}
@@ -235,7 +278,7 @@ const ExecutiveHome: React.FC = () => {
     }
     
     setChartData(processedChartData);
-  }, [forecastTypes, multipliers, rawMetricData, chartData["Stress Tests"]]);
+  }, [forecastTypes, multipliers, rawMetricData, chartData["Stress Tests"], forecastYears]);
 
   // Helper function to generate forecast data
   const generateForecastData = (metricData: any[], metricName: string) => {
@@ -252,9 +295,9 @@ const ExecutiveHome: React.FC = () => {
     const lastDataPoint = existingData[existingData.length - 1];
     const lastYear = parseInt(lastDataPoint.year, 10);
     
-    // Generate forecast data up to 2029
+    // Generate forecast data based on forecastYears setting
     const forecastData = [];
-    const targetEndYear = 2029;
+    const targetEndYear = lastYear + forecastYears;
     
     for (let year = lastYear + 1; year <= targetEndYear; year++) {
       const forecastYear = year.toString();
@@ -522,8 +565,19 @@ const ExecutiveHome: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="flex-1 p-4">
+    <div className="min-h-screen bg-gray-50 p-4">
+      {/*Top Nav bar with logo and user title*/}
+      <header className="flex justify-between items-center bg-blue-400 p-4 rounded">
+        <Image src="/spirelogo.png" alt="Spire Logo" width={120} height={40} className="object-contain" />
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-500">JD</div>
+          <div>
+            <h2 className="text-xl font-bold text-black">John Doe</h2>
+            <p className="text-sm text-gray-700">Executive</p>
+          </div>
+        </div>
+      </header>
+
       <div className="flex gap-2 mt-4 items-center">
         {/* Section buttons */}
         <div className="flex gap-2 flex-grow">
@@ -572,8 +626,8 @@ const ExecutiveHome: React.FC = () => {
                         margin={{ top: 20, right: 20, bottom: 30, left: 60 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
-                          dataKey="year" 
+                        <XAxis
+                          dataKey="year"
                           tickMargin={10}
                           domain={['dataMin', 'dataMax']}
                           type="category"
@@ -619,10 +673,10 @@ const ExecutiveHome: React.FC = () => {
             <div className="p-5 border rounded bg-gray-100">
               {renderChartSection("Income Statement", optionsMap["Income Statement"])}
             </div>
-            
+
             {/* White space between sections */}
             <div className="h-6"></div>
-            
+
             {/* Render Balance Sheet Section */}
             <div className="p-5 border rounded bg-gray-100">
               {renderChartSection("Balance Sheet", optionsMap["Balance Sheet"])}
@@ -630,9 +684,8 @@ const ExecutiveHome: React.FC = () => {
           </div>
         )}
       </div>
-      </div>
     </div>
-  );
+);
 };
 
 export default ExecutiveHome;
