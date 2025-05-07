@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { getSession, Session } from "next-auth/react";
 import NavbarSettings from "@/components/navbar-settings";
-import Page from "@/components/client-page";
+import Page from "@/app/user/page";
 
 const Navbar = () => {
   const [session, setSession] = useState<Session | null>(null);

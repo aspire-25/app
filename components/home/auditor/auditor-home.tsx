@@ -53,9 +53,10 @@ const AuditorHome: React.FC = () => {
     };
 
     const handleEditSheet = () => {
-        console.log('Redirecting to edit-income-statements');
-        router.push('/user/edit-income-statements');
+        console.log('Redirecting to edit-income statement and balance sheets');
+        router.push("/user/financials"); 
     };
+    
 
     const handleEditGraphs = () => {
         console.log('Redirecting to edit-graphs');
@@ -63,6 +64,7 @@ const AuditorHome: React.FC = () => {
     };
 
     return (
+
         <div className="min-h-screen bg-gray-50 p-4">
             <Tabs value={activeYear} onValueChange={(value) => setActiveYear(value)} className="mt-4">
                 <TabsList className="flex gap-2 justify-start">

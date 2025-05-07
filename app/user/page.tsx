@@ -1,29 +1,20 @@
-import Page from "@/components/client-page";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+'use client';
 
-const Home = () => {
+import AuditorHome from "../../components/home/auditor/auditor-home-adjusted";
+import AnalystHome from "../../components/home/analyst/analyst-home";
+import ExecutiveHome from "../../components/home/executive/executive-home";
+import UsersPage from "../../components/home/admin/admin-home";
+
+const Page = ({ tempRole }: { tempRole: string }) => {
     return (
-        <>
-            <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-                <div className="flex items-center gap-2 px-4">
-                    <SidebarTrigger className="-ml-1" />
-                    <Separator orientation="vertical" className="mr-2 h-4" />
-                    <Breadcrumb>
-                        <BreadcrumbList>
-                            <BreadcrumbItem className="hidden md:block">
-                                <BreadcrumbLink href="/user">
-                                    Aspire Financial Tracker
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
-                    </Breadcrumb>
-                </div>
-            </header>
-            <Page />
-        </>
+        <div className="pt-[80px]"> 
+            {tempRole === "auditor" && <AuditorHome />}
+            {tempRole === "analyst" && <AnalystHome />}
+            {tempRole === "executive" && <ExecutiveHome />}
+            {tempRole === "admin" && <UsersPage />}
+        </div>
     );
 };
 
-export default Home;
+
+export default Page;
