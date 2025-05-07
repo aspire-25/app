@@ -6,18 +6,18 @@ import { ChevronsUpDown } from "lucide-react";
 
 const ToggleView = ({ updateTempRole, tempRole }: { updateTempRole: (role: string) => void, tempRole: string }) => {
   
-  // Function that switches roles when selecting from dropdown
   const handleRoleSwitch = (role: string) => {
-    updateTempRole(role); // Pass selected role to client-page.tsx
+    updateTempRole(role);
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 focus:outline-none">
-          <div className="text-left text-sm hidden md:block">
-            <strong className="font-bold">Toggle View:</strong> {tempRole.charAt(0).toUpperCase() + tempRole.slice(1)}
-          </div>
+            <div className="text-left text-sm hidden md:block pl-2">
+                <strong className="font-bold">Toggle View:</strong> {tempRole.charAt(0).toUpperCase() + tempRole.slice(1)}
+            </div>
+
           <ChevronsUpDown className="ml-2 size-4 hidden md:block" />
         </button>
       </DropdownMenuTrigger>

@@ -23,7 +23,7 @@ const NavbarSettings = ({ session, tempRole, updateTempRole }: { session: Sessio
             </Avatar>
             <div className="text-left text-sm hidden md:block">
               <div className="font-medium">{session.user.name}</div>
-              <div className="text-xs opacity-75">Viewing as: {tempRole}</div>
+              <div className="text-xs opacity-75">Viewing as: {tempRole.charAt(0).toUpperCase() + tempRole.slice(1)}</div>
             </div>
             <ChevronsUpDown className="ml-2 size-4 hidden md:block" />
           </button>
@@ -33,11 +33,17 @@ const NavbarSettings = ({ session, tempRole, updateTempRole }: { session: Sessio
           <DropdownMenuLabel><strong className="font-bold">Settings</strong></DropdownMenuLabel>
           <DropdownMenuSeparator />
   
-          {/* ToggleView now updates global tempRole */}
           <ToggleView tempRole={tempRole} updateTempRole={updateTempRole} />
   
           <DropdownMenuSeparator />
   
+          <DropdownMenuItem asChild>
+  <a href="/user/manage-user" className="hover:bg-gray-100 p-2 block">
+    Manage User
+  </a>
+</DropdownMenuItem>
+<DropdownMenuSeparator />
+
           <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })} className="flex items-center gap-2 hover:bg-red-100">
             <LogOut size={16} />
             <span>Log out</span>
