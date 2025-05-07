@@ -3,7 +3,6 @@
 'use client';
 
 import React, {useState, useEffect} from "react";
-import Image from "next/image";
 import {CartesianGrid, Label, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 
 const ExecutiveHome: React.FC = () => {

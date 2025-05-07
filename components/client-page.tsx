@@ -7,7 +7,6 @@ import ExecutiveHome from "./home/executive/executive-home";
 import UsersPage from "./home/admin/admin-home";
 import { Button } from "./ui/button";
 import { useState } from "react";
-import { SidebarTrigger } from "./ui/sidebar";
 
 const Page = () => {
     // ^^^ got rid of the async for now.

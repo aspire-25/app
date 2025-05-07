@@ -1,10 +1,5 @@
 import { auth } from "@/auth";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { fetchFinancials } from "@/lib/fetch";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import SpireHeader from "@/components/spire-header";
 
