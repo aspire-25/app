@@ -66,6 +66,23 @@ const StressTestInputs: React.FC<ChildProps> = ({ onParamsUpdate }) => {
         return defaultTableData;
     })
 
+    /*
+    const handleSave = async () => {
+        setIsLoading(true);
+        const RESPONSE = await fetch(`/api/financials`, {
+            method: 'POST',
+            cache: 'no-store',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(financials)
+        });
+        setIsLoading(false);
+        if (RESPONSE.ok) {
+            router.push(`/user/financials/${financials.income.year}`);
+        }
+    };*/
+
     const handleUpdate = (event : React.ChangeEvent<HTMLInputElement>) => {
         // if the parameters values are NOT default, update the table data to reflect the change in parameters, and send the values to the parent.
         console.log("hey")
@@ -77,6 +94,8 @@ const StressTestInputs: React.FC<ChildProps> = ({ onParamsUpdate }) => {
 
         // send to parent
         onParamsUpdate(updatedTableData.map(e => e.interestAndBalance))
+
+        
     }
 
     return (

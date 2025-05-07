@@ -34,6 +34,8 @@ const StressTest5 = () => {
 
                                 {(item.val == "SLC5a") && <StressTest5InputSLC />}
 
+                                {(item.val == "SLC5b") && <StressTest5InputSLC />}
+
                             </TabsContent>
                         </>
                         

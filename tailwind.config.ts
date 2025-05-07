@@ -59,7 +59,12 @@ const config: Config = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+  			spire: {
+  				orange: '#F04E23',
+  				blue: '#1A237E',
+  				black: '#111111',
+  			},
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -87,7 +92,10 @@ const config: Config = {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  		},
+  		fontFamily: {
+  			sans: ['Inter', 'Montserrat', 'Poppins', 'Arial', 'sans-serif'],
+  		},
   	}
   },
   plugins: [require("tailwindcss-animate")],
