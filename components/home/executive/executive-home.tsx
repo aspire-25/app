@@ -281,18 +281,6 @@ const ExecutiveHome: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      {/*Top Nav bar with logo and user title*/}
-      <header className="flex justify-between items-center bg-blue-400 p-4 rounded">
-        <Image src="/spirelogo.png" alt="Spire Logo" width={120} height={40} className="object-contain" />
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-500">JD</div>
-          <div>
-            <h2 className="text-xl font-bold text-black">John Doe</h2>
-            <p className="text-sm text-gray-700">Executive</p>
-          </div>
-        </div>
-      </header>
-
       <div className="flex gap-2 mt-4 items-center">
         {/* Section buttons */}
         <div className="flex gap-2 flex-grow">

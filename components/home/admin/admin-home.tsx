@@ -61,21 +61,6 @@ export default function UsersPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-[#7B96EC] p-4 flex justify-between items-center">
-        <Image src="/spirelogo.png" alt="Spire Logo" width={120} height={40} className="object-contain" priority />
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-            <div className="text-white">
-              <div>John Doe</div>
-              <div className="text-sm opacity-80">Admin</div>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="flex-1 container mx-auto p-6">

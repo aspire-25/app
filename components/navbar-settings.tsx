@@ -38,10 +38,8 @@ const NavbarSettings = ({ session, tempRole, updateTempRole }: { session: Sessio
           <DropdownMenuSeparator />
   
           <DropdownMenuItem asChild>
-  <a href="/user/manage-user" className="hover:bg-gray-100 p-2 block">
-    Manage User
-  </a>
-</DropdownMenuItem>
+            <a href="/user/manage-user" className="hover:bg-gray-100 p-2 block">Manage User</a>
+          </DropdownMenuItem>
 <DropdownMenuSeparator />
 
           <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })} className="flex items-center gap-2 hover:bg-red-100">

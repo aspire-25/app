@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 
+
 const AuditorHome: React.FC = () => {
     const [activeYear, setActiveYear] = useState<string>("2024");
     const [years, setYears] = useState<string[]>(["2022", "2023", "2024"]);
@@ -63,19 +64,6 @@ const AuditorHome: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 p-4">
-            <header className="flex justify-between items-center bg-blue-400 p-4 rounded-xl shadow-md">
-                <h1 className="text-3xl font-bold text-black">Spire</h1>
-                <div className="flex items-center gap-4">
-                    <Avatar>
-                        <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <h2 className="text-xl font-bold text-black">John Doe</h2>
-                        <p className="text-sm text-gray-700">Auditor</p>
-                    </div>
-                </div>
-            </header>
-
             <Tabs value={activeYear} onValueChange={(value) => setActiveYear(value)} className="mt-4">
                 <TabsList className="flex gap-2 justify-start">
                     {years.map((year) => (

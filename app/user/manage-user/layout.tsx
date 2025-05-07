@@ -5,16 +5,17 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
-
-export default async function Layout({
-    children
-}: {
-    children: React.ReactNode;
-}) {
+export default async function Layout({ children }: { children: React.ReactNode }) {
     const SESSION = await auth();
 
     if (!SESSION?.user) {
         redirect('/');
+    }
+
+    const shouldRenderManageUser = false; 
+
+    if (!shouldRenderManageUser) {
+        return null;
     }
 
     return (
