@@ -62,7 +62,7 @@ const StressTest2 = () => {
             </div>
 
             <TableDivider/>
-                <p className="font-bold text-red-600 text-2xl"> ⚠️ Ask: is the difference in formula for cell O47 for Stress Test 2 intentional?</p><br></br>
+                
                 <LossOfInterestTable principalData={st1Output.map(e => e*(decreaseInRevenues/100))}/>
             
         </>
