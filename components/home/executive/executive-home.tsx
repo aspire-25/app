@@ -8,7 +8,6 @@ import {CartesianGrid, Label, Line, LineChart, ResponsiveContainer, Tooltip, XAx
 const ExecutiveHome: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>("Stress Test Results");
   const sections = ["Stress Test Results", "Sustainability Model"];
-  const [toggles, setToggles] = useState<boolean[]>(Array(5).fill(false));
   const stressTestDesc = [
     "Scenario #1: 30% drop in return rate of investment",
     "Scenario #2: 60% sustained drop in returned rate of investment",
@@ -24,9 +23,22 @@ const ExecutiveHome: React.FC = () => {
     "Balance Sheet": ["Total Current Assets", "Total Long-Term Asset", "Total Assets", "Total Current Liabilities", "Total Long-Term Liabilities",
       "Total Liabilities", "Total Stockholder's Equity", "Total Liabilities and Equity"]
   };
+  
+  const [stressToggles, setStressToggles] = useState<boolean[]>(Array(5).fill(false));
+  const [incomeToggles, setIncomeToggles] = useState<Record<string, boolean>>(
+    Object.fromEntries(optionsMap["Income Statement"].map(option => [option, false]))
+  );
+  const [balanceToggles, setBalanceToggles] = useState<Record<string, boolean>>(
+    Object.fromEntries(optionsMap["Balance Sheet"].map(option => [option, false]))
+  );
 
   // State for chart data
   const [chartData, setChartData] = useState<Record<string, any[]>>({});
+
+  // State for forecast settings
+  const [forecastYears] = useState<number>(5);
+  const [forecastTypes] = useState<{ [key: string]: 'average' | 'multiplier' }>({});
+  const [multipliers] = useState<{ [key: string]: number }>({});
 
   // Helper function to calculate percentages
   const calculatePercentage = (value: number, total: number) => {
@@ -34,25 +46,60 @@ const ExecutiveHome: React.FC = () => {
   };
 
   // Helper function to render chart sections
-  const renderChartSection = (title: string, options: string[]) => (
+  const renderChartSection = (title: string, options: string[], toggles: Record<string, boolean>, setToggles: React.Dispatch<React.SetStateAction<Record<string, boolean>>>) => (
     <div className="mt-6">
       <h3 className="text-xl font-bold mb-4 text-center">{title}</h3>
       {options.map((option) => (
-        <div key={option}>
-          <h4 className="text-lg font-semibold">{option}</h4>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData[option] || []} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="year" tickMargin={10}>
-                <Label value="Year" offset={-30} position="insideBottom" />
-              </XAxis>
-              <YAxis tickMargin={10} domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}>
-                <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
-              </YAxis>
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+        <div key={option} className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-lg font-semibold">{option}</h4>
+            <div
+              className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
+              ${toggles[option] ? "bg-green-500" : "bg-gray-300"}`}
+              onClick={() => {
+                setToggles(prev => ({
+                  ...prev,
+                  [option]: !prev[option]
+                }));
+              }}
+            >
+              <div
+                className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300
+                ${toggles[option] ? "translate-x-6" : "translate-x-0"}`}
+              ></div>
+            </div>
+          </div>
+          
+          {toggles[option] && (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData[option] || []} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="year" tickMargin={10}>
+                  <Label value="Year" offset={-30} position="insideBottom" />
+                </XAxis>
+                <YAxis
+                  tickMargin={10}
+                  domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}
+                  tickFormatter={(value) => {
+                    // Check if the option name includes '%' to determine if it's a percentage value
+                    if (option.includes('%')) {
+                      return `${value}%`;
+                    }
+                    return `$${value.toLocaleString()}`;
+                  }}
+                >
+                  <Label
+                    value={option.includes('%') ? "% Value" : "Value (in $)"}
+                    offset={100}
+                    position="insideRight"
+                    angle={-90}
+                  />
+                </YAxis>
+                <Tooltip content={<CustomTooltip />} />
+                <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       ))}
     </div>
@@ -63,13 +110,13 @@ const ExecutiveHome: React.FC = () => {
     const fetchFinancialData = async () => {
       try {
         // Fetch financial data
-
         const response = await fetch('/api/financials', {
           method: 'GET',
           cache: 'no-store'
         });
         const financials = await response.json();
         const data = financials.data;
+
         if (data) {
           // Sort years numerically
           const sortedYears = Object.keys(data).map(Number).sort((a, b) => a - b);
@@ -215,6 +262,43 @@ const ExecutiveHome: React.FC = () => {
           processedChartData["Total Liabilities and Equity"] = processMetric("totalLiabilitiesAndEquity");
 
 
+          // Add forecast data
+          const latestYear = Math.max(...sortedYears);
+
+          // Generate forecast data for each metric
+          Object.keys(processedChartData).forEach(metric => {
+            if (metric !== "Stress Tests") {
+              const metricData = processedChartData[metric];
+              const forecastType = forecastTypes[metric] || 'average';
+              const multiplier = multipliers[metric] !== undefined ? multipliers[metric] : 1.5;
+
+              // Get the last few values to calculate average or apply multiplier
+              const lastValues = metricData.slice(-3).map(item => item.value);
+
+              // Generate forecast data points
+              for (let i = 1; i <= forecastYears; i++) {
+                const forecastYear = (latestYear + i).toString();
+                let forecastValue;
+
+                if (forecastType === 'average' && lastValues.length > 0) {
+                  // Calculate average of last 3 values (or fewer if not enough data)
+                  forecastValue = lastValues.reduce((sum, val) => sum + val, 0) / lastValues.length;
+                } else {
+                  // Use multiplier on the last value
+                  const lastValue = metricData[metricData.length - 1]?.value || 0;
+                  forecastValue = lastValue * (1 + multiplier / 100);
+                }
+
+                // Add forecast data point
+                metricData.push({
+                  year: forecastYear,
+                  value: forecastValue,
+                  isForecast: true // Mark as forecast data for styling
+                });
+              }
+            }
+          });
+
           // Add stress test data (using sample data for now)
           processedChartData["Stress Tests"] = [
             { year: "2025", goodsSoldCost: 900, grossProfit: 846 },
@@ -269,9 +353,9 @@ const ExecutiveHome: React.FC = () => {
     return null;
   };
 
-  // Toggle function
-  const toggleSwitch = (index: number) => {
-    setToggles((prev: boolean[]) => {
+  // Toggle function for stress tests
+  const toggleStressSwitch = (index: number) => {
+    setStressToggles((prev: boolean[]) => {
       const updatedToggles = [...prev];
       updatedToggles[index] = !updatedToggles[index];
       return updatedToggles;
@@ -301,14 +385,14 @@ const ExecutiveHome: React.FC = () => {
         <div className="mt-4 p-4 bg-white rounded shadow-md">
           {activeSection === "Stress Test Results" ? (
             <div className="space-y-4">
-              {toggles.map((isOn, index) => (
+              {stressToggles.map((isOn, index) => (
                 <div key={index}>
                   <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold">Stress Test #{index + 1}</h3>
                     <div
                       className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
                       ${isOn ? "bg-green-500" : "bg-gray-300"}`}
-                      onClick={() => toggleSwitch(index)}
+                      onClick={() => toggleStressSwitch(index)}
                     >
                       <div
                         className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300
@@ -344,8 +428,8 @@ const ExecutiveHome: React.FC = () => {
                               // Step 2: Round the tick value to the nearest 500 for cleaner ticks
                               const roundedTick = Math.round(tick / 500) * 500;
 
-                              // Step 3: Format the tick value with commas
-                              return roundedTick.toLocaleString();
+                              // Step 3: Format the tick value with commas and add $ sign
+                              return `$${roundedTick.toLocaleString()}`;
                             }}
                           >
                             <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
@@ -366,12 +450,17 @@ const ExecutiveHome: React.FC = () => {
           ) : (
             /* Sustainability Model section */
             <div className="p-5 border rounded bg-gray-100">
+              {/* Income Statement Section */}
               <div className="space-y-6">
-                {/* Render Income Statement Section */}
-                {renderChartSection("Income Statement", optionsMap["Income Statement"])}
+                {renderChartSection("Income Statement", optionsMap["Income Statement"], incomeToggles, setIncomeToggles)}
+              </div>
 
-                {/* Render Balance Sheet Section */}
-                {renderChartSection("Balance Sheet", optionsMap["Balance Sheet"])}
+              {/* White spacer */}
+              <div className="my-16 bg-white h-12 rounded"></div>
+
+              {/* Balance Sheet Section */}
+              <div className="pt-8 border-t border-gray-200">
+                {renderChartSection("Balance Sheet", optionsMap["Balance Sheet"], balanceToggles, setBalanceToggles)}
               </div>
             </div>
           )}
