@@ -10,6 +10,8 @@ import {
     TableHeader,
     TableRow,
   } from "@/components/ui/table"
+  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+  import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 type ChildProps = {
     onParamsUpdate: (data: Array<number>) => void; // The function to send data back to the parent
@@ -150,26 +152,55 @@ const StressTestInputs: React.FC<ChildProps> = ({ onParamsUpdate }) => {
 
             <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Output Table</div>
             <div className="overflow-y-auto h-[50vh]" >
-                <Table>
-                    <TableHeader>
-                        <TableRow className="text-base">
-                            <TableHead className="text-center">Year</TableHead>
-                            <TableHead className="text-center">Balance</TableHead>
-                            <TableHead className="text-center">Interest Earned</TableHead>
-                            <TableHead className="text-center">Interest Earned + Balance</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {tableData.map((item) => (
-                            <TableRow key={item.year} className="text-xs text-center">
-                                <TableCell>{item.year}</TableCell>
-                                <TableCell>${item.balance.toFixed(2)}</TableCell>
-                                <TableCell className="text-indigo-900"><b>${item.interestEarned.toFixed(2)}</b></TableCell>
-                                <TableCell className="text-amber-900"><b>${item.interestAndBalance.toFixed(2)}</b></TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+
+                <Tabs defaultValue="table" className="w-full h-auto">
+                    <div className="flex">
+                        <p className="text-lg mt-auto mb-auto">Show as:</p>
+                        <TabsList className="grid w-2/5 h-auto grid-cols-2 text-base ml-4">
+                            <TabsTrigger value="table" className="text-base text-balance text-base">Table</TabsTrigger>
+                            <TabsTrigger value="chart" className="text-base text-balance text-base">Chart</TabsTrigger>
+                        </TabsList>
+                    </div>
+
+                    <TabsContent value = "table">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="text-base">
+                                    <TableHead className="text-center">Year</TableHead>
+                                    <TableHead className="text-center">Balance</TableHead>
+                                    <TableHead className="text-center">Interest Earned</TableHead>
+                                    <TableHead className="text-center">Interest Earned + Balance</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {tableData.map((item) => (
+                                    <TableRow key={item.year} className="text-xs text-center">
+                                        <TableCell>{item.year}</TableCell>
+                                        <TableCell>${item.balance.toFixed(2)}</TableCell>
+                                        <TableCell className="text-indigo-900"><b>${item.interestEarned.toFixed(2)}</b></TableCell>
+                                        <TableCell className="text-amber-900"><b>${item.interestAndBalance.toFixed(2)}</b></TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TabsContent>
+
+                    <TabsContent value="chart">
+                        <ResponsiveContainer width = "95%" height={window.innerHeight *0.35}>
+                            
+                            <LineChart data={tableData} margin={{ top: 5, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="6 6" />
+                                <XAxis dataKey="year" />
+                                <YAxis orientation="left"/>
+                                <Tooltip separator=": $"/>
+                                <Legend />
+                                <Line type="monotone" dataKey="interestEarned" stroke="indigo" strokeWidth={2}/>
+                                <Line type="monotone" dataKey="interestAndBalance" stroke="goldenrod" strokeWidth={2}/>
+                            </LineChart>
+    
+                        </ResponsiveContainer>
+                    </TabsContent>
+                </Tabs>
             </div>
         </div>
     )
