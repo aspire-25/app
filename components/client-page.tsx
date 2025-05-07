@@ -7,6 +7,7 @@ import ExecutiveHome from "./home/executive/executive-home";
 import UsersPage from "./home/admin/admin-home";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import { SidebarTrigger } from "./ui/sidebar";
 
 const Page = () => {
     // ^^^ got rid of the async for now.
@@ -59,16 +60,55 @@ const Page = () => {
     };
 
     return (
-        <div>
-            <Button onClick={() => updateTempRole("analyst")} className = "m-1">Analyst View</Button>
-            <Button onClick={() => updateTempRole("executive")} className = "m-1">Executive View</Button>
-            <Button onClick={() => updateTempRole("auditor")} className = "m-1">Auditor View</Button>
-            <Button onClick={() => updateTempRole("admin")} className = "m-1">Admin View</Button>
-            <p className="text-base">Currently Viewing: {tempRole} view</p>
-            <br></br>
+        <div className="pt-0 mt-0">
+            {/* Sticky Header with logo and user info */}
+            <header className="bg-spire-header p-4 flex flex-col items-center sticky top-0 z-50 shadow mt-0 pt-0">
+                <div className="w-full flex justify-between items-center max-w-5xl mx-auto">
+                    {/* Logo */}
+                    <div className="flex items-center gap-4">
+                        <img src="/spirelogo.png" alt="Spire Logo" className="h-10 w-auto" />
+                    </div>
+                    {/* User Info */}
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-500">JD</div>
+                        <div className="text-white">
+                            <div>John Doe</div>
+                            <div className="text-sm opacity-80">{tempRole.charAt(0).toUpperCase() + tempRole.slice(1)}</div>
+                        </div>
+                    </div>
+                </div>
+                {/* View switch buttons below logo/user info */}
+                <div className="flex justify-center w-full mt-4">
+                    <div className="flex bg-white rounded-full shadow px-2 py-2 gap-2">
+                        <Button
+                            onClick={() => updateTempRole('analyst')}
+                            className={`font-bold rounded-full px-8 py-3 text-lg transition-colors ${tempRole === 'analyst' ? 'bg-[#F04E23] text-white' : 'bg-white text-black hover:bg-gray-100'}`}
+                        >
+                            Analyst View
+                        </Button>
+                        <Button
+                            onClick={() => updateTempRole('executive')}
+                            className={`font-bold rounded-full px-8 py-3 text-lg transition-colors ${tempRole === 'executive' ? 'bg-[#F04E23] text-white' : 'bg-white text-black hover:bg-gray-100'}`}
+                        >
+                            Executive View
+                        </Button>
+                        <Button
+                            onClick={() => updateTempRole('auditor')}
+                            className={`font-bold rounded-full px-8 py-3 text-lg transition-colors ${tempRole === 'auditor' ? 'bg-[#F04E23] text-white' : 'bg-white text-black hover:bg-gray-100'}`}
+                        >
+                            Auditor View
+                        </Button>
+                        <Button
+                            onClick={() => updateTempRole('admin')}
+                            className={`font-bold rounded-full px-8 py-3 text-lg transition-colors ${tempRole === 'admin' ? 'bg-[#F04E23] text-white' : 'bg-white text-black hover:bg-gray-100'}`}
+                        >
+                            Admin View
+                        </Button>
+                    </div>
+                </div>
+            </header>
             <PageContent />
         </div>
-        
     );
 }
 
