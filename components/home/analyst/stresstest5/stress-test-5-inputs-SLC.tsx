@@ -11,13 +11,23 @@ import {
     TableRow,
   } from "@/components/ui/table"
 
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 /* type ChildProps = {
     onParamsUpdate: (data: Array<number>) => void; // The function to send data back to the parent
     version: string,
     intrDataFrom5b: Array<number>
 }; */
 
-const StressTest5InputSLC =() => {
+/*
+type ChildProps = {
+    onParamsUpdate: (data: Array<number>) => void; // The function to send data back to the parent
+};
+*/
+
+const StressTest5InputSLC=() => {
 
     /* ======= This function and object will be used to initialize state; thus it's put up here to make sure code is DRY. ======= */
     const defaults = {
@@ -51,9 +61,12 @@ const StressTest5InputSLC =() => {
             const interest = (beginningBalance*((interestRate/100)/12))
             const principal = monthlyPayment - interest
             const endingBalance = beginningBalance - principal
+
+            const paymentDateString = (paymentDate.getMonth() + 1) + "/" + paymentDate.getDate() + "/" + paymentDate.getFullYear()
             
             data.push({
                 paymentDate: paymentDate,
+                paymentDateString: paymentDateString,
                 beginningBalance: beginningBalance,
                 monthlyPayment: monthlyPayment,
                 principal: principal,
@@ -81,8 +94,9 @@ const StressTest5InputSLC =() => {
         })
     })
 
-    const [tableData, updateTableData] = useState<{ 
+    const [tableData, updateTableData] = useState<{
         paymentDate: Date,
+        paymentDateString: String,
         beginningBalance: number, 
         principal: number, 
         endingBalance: number ,
@@ -94,6 +108,7 @@ const StressTest5InputSLC =() => {
 
         let defaultTableData: {
             paymentDate: Date,
+            paymentDateString: String,
             beginningBalance: number, 
             principal: number, 
             endingBalance: number ,
@@ -103,14 +118,10 @@ const StressTest5InputSLC =() => {
 
         defaultTableData = generateTableData(defaults.presentValue, defaults.interestRate, defaults.loanStartDate, defaults.numPayments)
 
-        // send default data to the parent component upon initialization
-        /*
-        if (version == "B") {
-            onParamsUpdate(defaultTableData.map(e => e.interestEarned))
-        }
-        */
         return defaultTableData;
     })
+
+    const [chartVar, setChartVar] = useState("")
 
     const handleUpdate = (event : React.ChangeEvent<HTMLInputElement>) => {
         // if the parameters values are NOT default, update the table data to reflect the change in parameters, and send the values to the parent.
@@ -127,13 +138,10 @@ const StressTest5InputSLC =() => {
 
         const updatedTableData = generateTableData(updatedParams.presentValue, updatedParams.interestRate, updatedParams.loanStartDate, updatedParams.numPayments)
         updateTableData(updatedTableData)
+    }
 
-        // send to parent
-        /*
-        if (version == "B") {
-            onParamsUpdate(updatedTableData.map(e => e.interestEarned))
-        }
-        */
+    const convertCamelCaseToNormal = (text: String) => {
+        return (text.replace(/[A-Z]/g, letter => ` ${letter}`))[0].toUpperCase() + (text.replace(/[A-Z]/g, letter => ` ${letter}`)).slice(1)
     }
 
     return (
@@ -156,28 +164,12 @@ const StressTest5InputSLC =() => {
                             <Input type="number" id="interestRate" placeholder="Enter in %" className="text-base mb-3" value={modelParams.interestRate} name="interestRate" onChange={handleUpdate}/>
                             <Button type="submit"  className="bg-cyan-900">Save</Button>
                         </div>
-
-                        {/*
-                        <Label htmlFor="term" className="mb-1">Loan Period (yrs)</Label>
-                        <div className="flex">
-                            <Input type="number" id="term" placeholder="Enter in years" className="text-base mb-3" value={modelParams.term} name="term" onChange={handleUpdate}/>
-                            <Button type="submit"  className="bg-cyan-900">Save</Button>
-                        </div>
-                        */}
                         
                         <Label htmlFor="loanStartDate" className="mb-1">Loan Start Date</Label>
                         <div className="flex">
                             <Input type="date" id="loanStartDate" placeholder="" className="text-base mb-3" name="loanStartDate" onChange={handleUpdate}/>
                             <Button type="submit"  className="bg-cyan-900">Save</Button>
                         </div>
-                        
-                        {/*
-                        <Label htmlFor="monthlyPayment" className="mb-1">Monthly Payment ($)</Label>
-                        <div className="flex">
-                            <Input type="number" id="monthlyPayment" placeholder="Monthly Payment ($)" className="text-base mb-3" value={modelParams.monthlyPayment} name="monthlyPayment" onChange={handleUpdate}/>
-                            <Button type="submit" className="bg-cyan-900">Save</Button>
-                        </div>
-                        */}
 
                         <Label htmlFor="numPayments" className="mb-1">Number of Payments</Label>
                         <div className="flex">
@@ -214,39 +206,91 @@ const StressTest5InputSLC =() => {
             {/* for the chart */}
 
             <div className="text-2xl font-bold border-l-[5px] border-orange-900 text-white-900 pb-1 pt-1 pl-3 mb-3">Payments by month</div>
-            <div className="overflow-y-auto" >
-                <Table>
-                    <TableHeader>
-                        <TableRow className="text-base">
-                            {Object.keys(tableData[0]).map((key) => (
-                                /* convert the camelCase keys into "proper" table headings. */
-                                <TableHead className="text-center" key={key}>{(key.replace(/[A-Z]/g, letter => ` ${letter}`))[0].toUpperCase() + (key.replace(/[A-Z]/g, letter => ` ${letter}`)).slice(1)}</TableHead>
-                            ))}
-                        </TableRow>
-                    </TableHeader>
-                    
-                    {/* table body */}
-                    <TableBody>
-                        {tableData.map((item, index) => (
-                            <TableRow key={index} className="text-sm text-center">
-                                {Object.keys(item).map((rowKey) => (
-                                    // dumb TypeScript makes me put "item[rowKey as keyof typeof item]" instead of simply "item[rowKey]" 💀
-                                    
-                                    (rowKey == "paymentDate" ? (
-                                        <TableCell key={rowKey} className="text-base font-bold">{(item[rowKey].getMonth() + 1) + "/" + item[rowKey].getDate() + "/" + item[rowKey].getFullYear()}</TableCell>
-                                    ) : (
-                                        (Math.round(item[rowKey as keyof unknown]) >= 0) ? 
-                                        (<TableCell key={rowKey}>${Number(item[rowKey as keyof unknown]).toFixed(2)}</TableCell>) : 
-                                        (<TableCell key={rowKey} className="text-red-900">(${0-Math.round(item[rowKey as keyof unknown])}) <sup>[neg]</sup></TableCell>)
-                                    ))
-                                    
+
+            <Tabs defaultValue="table" className="w-full h-auto">
+                <div className="flex">
+                    <p className="text-lg mt-auto mb-auto">Show as:</p>
+                    <TabsList className="grid w-1/5 h-auto grid-cols-2 text-base ml-4">
+                        <TabsTrigger value="table" className="text-base text-balance">Table</TabsTrigger>
+                        <TabsTrigger value="chart" className="text-base text-balance">Chart</TabsTrigger>
+                    </TabsList>
+                </div>
+                
+
+                {/* show the table if the table is toggled (duh) */}
+
+                <TabsContent value="table">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="text-base">
+                                {Object.keys(tableData[0]).slice(1).map((key) => (
+                                    /* convert the camelCase keys into "proper" table headings. */
+                                    <TableHead className="text-center" key={key}>{(key.replace(/[A-Z]/g, letter => ` ${letter}`))[0].toUpperCase() + (key.replace(/[A-Z]/g, letter => ` ${letter}`)).slice(1)}</TableHead>
                                 ))}
                             </TableRow>
-                        ))}
-                    </TableBody>
+                        </TableHeader>
+                        
+                        {/* table body */}
+                        <TableBody>
+                            {tableData.map((item, index) => (
+                                <TableRow key={index} className="text-sm text-center">
+                                    {Object.keys(item).slice(1).map((rowKey) => (
+                                        // dumb TypeScript makes me put "item[rowKey as keyof typeof item]" instead of simply "item[rowKey]" 💀
+                                        
+                                        (rowKey == "paymentDateString" ? (
+                                            <TableCell key={rowKey} className="text-base font-bold">{item[rowKey as keyof unknown]}</TableCell>
+                                        ) : (
+                                            (Math.round(item[rowKey as keyof unknown]) >= 0) ? 
+                                            (<TableCell key={rowKey}>${Number(item[rowKey as keyof unknown]).toFixed(2)}</TableCell>) : 
+                                            (<TableCell key={rowKey} className="text-red-900">(${0-Math.round(item[rowKey as keyof unknown])}) <sup>[neg]</sup></TableCell>)
+                                        ))
+                                        
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                        
+                    </Table>
+                </TabsContent>
+
+                {/* show the chart if chart is toggled (duh) */}
+
+                <TabsContent value="chart" className="w-full">
+                    <br/>
+                        <div className="flex w-[100%] justify-end">
+                            <div className="w-[70%] pl-[5%]">
+                                {chartVar != "" ? (<b className="text-2xl">{convertCamelCaseToNormal(chartVar)} over time [monthly]</b>) : (<b className="text-2xl">Please select a variable --&gt;</b>)}
+                            </div>
+                            
+                            
+                            <div className="w-[30%]">
+                                <Select onValueChange={setChartVar} value={chartVar} >
+                                    <SelectTrigger className="w-[250px] text-base">
+                                        <SelectValue placeholder="Select a variable..." defaultValue={"beginningBalance"} className="text-base"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.keys(tableData[0]).slice(2).map((item, index) => (
+                                            <SelectItem value={item} key={index} className="text-base">{convertCamelCaseToNormal(item)}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            
+                        </div>
+                    <br/>
+                    <ResponsiveContainer width="100%" height={window.innerHeight *0.6}>
+                        <LineChart data={tableData}
+                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="6 6" />
+                                <XAxis dataKey="paymentDateString" />
+                                <YAxis orientation="left"/>
+                                <Tooltip separator=": $"/>
+                                <Line type="basis" dataKey={chartVar} stroke="blue" strokeWidth={2}/>
+                        </LineChart>
+                    </ResponsiveContainer>
                     
-                </Table>
-            </div>
+                </TabsContent>
+            </Tabs>
         </div>
     )
 }
