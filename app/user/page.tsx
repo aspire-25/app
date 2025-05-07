@@ -7,7 +7,6 @@ import SpireHeader from "@/components/spire-header";
 const Home = () => {
     return (
         <>
-            <SpireHeader />
             <Page />
         </>
     );
