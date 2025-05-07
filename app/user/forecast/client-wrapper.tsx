@@ -151,7 +151,7 @@ const ClientWrapper = () => {
     });
 
     const chartData = extendedYears.map((year, i) => {
-      const entry: any = { year: String(year) };
+      const entry: Record<string, number | string> = { year: String(year) };
       Object.keys(chartLines).forEach(label => {
         entry[label] = chartLines[label][i];
       });

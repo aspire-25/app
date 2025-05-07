@@ -5,8 +5,6 @@ import StressTest3 from "./stresstest3/stress-test-3"
 import StressTest4 from "./stresstest4/stress-test-4"
 import StressTest5 from "./stresstest5/stress-test-5"
 import TableDivider from "./tableDivider"
-import Image from "next/image"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const AnalystLanding = () => {
     const labels = [

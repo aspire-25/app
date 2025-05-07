@@ -8,26 +8,26 @@ import { useRouter } from "next/navigation";
 import AuditorHomeAdjusted from "@/components/home/auditor/auditor-home-adjusted";
 
 const Page = ({ tempRole }: { tempRole: string }) => {
-  const router = useRouter();
+    const router = useRouter();
 
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    useLayoutEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
-  useEffect(() => {
-    if (tempRole !== "auditor") {
-      router.push("/user");
-    }
-  }, [tempRole, router]);
+    useEffect(() => {
+        if (tempRole !== "auditor") {
+            router.push("/user");
+        }
+    }, [tempRole, router]);
 
-  return (
-    <div className="pt-[80px]">
-      {tempRole === "auditor" && <AuditorHomeAdjusted />}
-      {tempRole === "analyst" && <AnalystHome />}
-      {tempRole === "executive" && <ExecutiveHome />}
-      {tempRole === "admin" && <UsersPage />}
-    </div>
-  );
+    return (
+        <div className="pt-[80px]">
+            {tempRole === "auditor" && <AuditorHomeAdjusted />}
+            {tempRole === "analyst" && <AnalystHome />}
+            {tempRole === "executive" && <ExecutiveHome />}
+            {tempRole === "admin" && <UsersPage />}
+        </div>
+    );
 };
 
 export default Page;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from "react";
+import React from "react";
 import type { Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import { ChevronsUpDown, LogOut } from "lucide-react";

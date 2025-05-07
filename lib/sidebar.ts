@@ -16,8 +16,6 @@ export type SidebarMenuSection = {
     items: SidebarMenuItem[];
 };
 
-let isSidebarHidden = true; // Set this to false if you want the sidebar to show
-
 const SIDEBAR_SECTIONS: SidebarMenuSection[] = [
     {
         role: "disabled",

@@ -7,7 +7,7 @@ import Page from "@/app/user/page";
 
 const Navbar = () => {
   const [session, setSession] = useState<Session | null>(null);
-  const [tempRole, setTempRole] = useState("auditor"); 
+  const [tempRole, setTempRole] = useState("auditor");
 
   useEffect(() => {
     getSession().then((sess) => setSession(sess));

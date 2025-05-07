@@ -1,12 +1,3 @@
-import * as React from "react"
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-
-import AppSidebarContent from "./sidebar-content"
-import { auth } from "@/auth";
-import { House } from "lucide-react";
-import AppSidebarFooter from "./sidebar-footer";
-
-
 const AppSidebar = async () => {
     // const session = await auth();
     // return (
