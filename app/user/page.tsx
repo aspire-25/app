@@ -1,14 +1,32 @@
-import Page from "@/components/client-page";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import SpireHeader from "@/components/spire-header";
+'use client';
 
-const Home = () => {
+import AnalystHome from "../../components/home/analyst/analyst-home";
+import ExecutiveHome from "../../components/home/executive/executive-home";
+import UsersPage from "../../components/home/admin/admin-home";
+import { useLayoutEffect, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import AuditorHomeAdjusted from "@/components/home/auditor/auditor-home-adjusted";
+
+const Home = ({ tempRole }: any) => {
+    const router = useRouter();
+
+    useLayoutEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    useEffect(() => {
+        if (tempRole !== "auditor") {
+            router.push("/user");
+        }
+    }, [tempRole, router]);
+
     return (
-        <>
-            <Page />
-        </>
+        <div className="pt-[80px]">
+            {tempRole === "auditor" && <AuditorHomeAdjusted />}
+            {tempRole === "analyst" && <AnalystHome />}
+            {tempRole === "executive" && <ExecutiveHome />}
+            {tempRole === "admin" && <UsersPage />}
+        </div>
     );
 };
 

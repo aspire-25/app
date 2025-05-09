@@ -11,9 +11,9 @@ import {
     TableRow,
   } from "@/components/ui/table"
 
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /* type ChildProps = {
     onParamsUpdate: (data: Array<number>) => void; // The function to send data back to the parent
@@ -96,7 +96,7 @@ const StressTest5InputSLC=() => {
 
     const [tableData, updateTableData] = useState<{
         paymentDate: Date,
-        paymentDateString: String,
+        paymentDateString: string,
         beginningBalance: number, 
         principal: number, 
         endingBalance: number ,
@@ -108,7 +108,7 @@ const StressTest5InputSLC=() => {
 
         let defaultTableData: {
             paymentDate: Date,
-            paymentDateString: String,
+            paymentDateString: string,
             beginningBalance: number, 
             principal: number, 
             endingBalance: number ,
@@ -140,7 +140,7 @@ const StressTest5InputSLC=() => {
         updateTableData(updatedTableData)
     }
 
-    const convertCamelCaseToNormal = (text: String) => {
+    const convertCamelCaseToNormal = (text: string) => {
         return (text.replace(/[A-Z]/g, letter => ` ${letter}`))[0].toUpperCase() + (text.replace(/[A-Z]/g, letter => ` ${letter}`)).slice(1)
     }
 
@@ -278,14 +278,14 @@ const StressTest5InputSLC=() => {
                             
                         </div>
                     <br/>
-                    <ResponsiveContainer width="100%" height={window.innerHeight *0.6}>
+                    <ResponsiveContainer width="100%" height={window.innerHeight *0.5}>
                         <LineChart data={tableData}
                             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="6 6" />
                                 <XAxis dataKey="paymentDateString" />
                                 <YAxis orientation="left"/>
                                 <Tooltip separator=": $"/>
-                                <Line type="basis" dataKey={chartVar} stroke="blue" strokeWidth={2}/>
+                                <Line type="basis" dataKey={chartVar} stroke="black" strokeWidth={3}/>
                         </LineChart>
                     </ResponsiveContainer>
                     
