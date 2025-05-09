@@ -3,7 +3,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { CartesianGrid, Label, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Label, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 const ExecutiveHome: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>("Stress Test Results");
@@ -34,6 +34,7 @@ const ExecutiveHome: React.FC = () => {
 
   // State for chart data
   const [chartData, setChartData] = useState<Record<string, any[]>>({});
+  const [stressTestData, setStressTestData] = useState<Record<string, any[]>>({});
 
   // State for forecast settings
   const [forecastYears] = useState<number>(5);
@@ -46,64 +47,243 @@ const ExecutiveHome: React.FC = () => {
   };
 
   // Helper function to render chart sections
-  const renderChartSection = (title: string, options: string[], toggles: Record<string, boolean>, setToggles: React.Dispatch<React.SetStateAction<Record<string, boolean>>>) => (
-    <div className="mt-6">
-      <h3 className="text-xl font-bold mb-4 text-center">{title}</h3>
-      {options.map((option) => (
-        <div key={option} className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="text-lg font-semibold">{option}</h4>
-            <div
-              className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
-              ${toggles[option] ? "bg-green-500" : "bg-gray-300"}`}
-              onClick={() => {
-                setToggles(prev => ({
-                  ...prev,
-                  [option]: !prev[option]
-                }));
-              }}
-            >
-              <div
-                className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-all duration-300
-                ${toggles[option] ? "translate-x-6" : "translate-x-0"}`}
-              ></div>
-            </div>
-          </div>
+  const renderChartSection = (title: string, options: string[], toggles: Record<string, boolean>, setToggles: React.Dispatch<React.SetStateAction<Record<string, boolean>>>) => {
+    // Determine if any percentage metrics are toggled on
+    const hasPercentageMetrics = options.some(option => option.includes('%') && toggles[option]);
+    const hasNonPercentageMetrics = options.some(option => !option.includes('%') && toggles[option]);
 
-          {toggles[option] && (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData[option] || []} margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" tickMargin={10}>
-                  <Label value="Year" offset={-30} position="insideBottom" />
-                </XAxis>
-                <YAxis
-                  tickMargin={10}
-                  domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}
-                  tickFormatter={(value) => {
-                    // Check if the option name includes '%' to determine if it's a percentage value
-                    if (option.includes('%')) {
-                      return `${value}%`;
-                    }
-                    return `$${value.toLocaleString()}`;
+    // Check if any metrics are toggled on
+    const anyMetricToggled = Object.values(toggles).some(value => value);
+
+    // Generate random colors for each metric
+    const colors = [
+      "#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088fe",
+      "#00c49f", "#ffbb28", "#ff8042", "#a4de6c", "#d0ed57"
+    ];
+
+    return (
+      <div className="mt-6">
+        <h3 className="text-xl font-bold mb-4 text-center">{title}</h3>
+
+        <div className="flex flex-row">
+          {/* Toggle switches for each metric - now on the left side */}
+          <div className="w-1/4 pr-4 overflow-y-auto max-h-[800px]">
+            {options.map((option) => (
+              <div key={option} className="flex items-center justify-between p-2 border rounded mb-2">
+                <h4 className="text-sm font-semibold mr-2">{option}</h4>
+                <div
+                  className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300
+                  ${toggles[option] ? "bg-green-500" : "bg-gray-300"}`}
+                  onClick={() => {
+                    setToggles(prev => ({
+                      ...prev,
+                      [option]: !prev[option]
+                    }));
                   }}
                 >
-                  <Label
-                    value={option.includes('%') ? "% Value" : "Value (in $)"}
-                    offset={100}
-                    position="insideRight"
-                    angle={-90}
-                  />
-                </YAxis>
-                <Tooltip content={<CustomTooltip />} />
-                <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
+                  <div
+                    className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-all duration-300
+                    ${toggles[option] ? "translate-x-6" : "translate-x-0"}`}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Charts - now on the right side */}
+          <div className="w-3/4">
+            {/* Chart for non-percentage metrics */}
+            {hasNonPercentageMetrics && (
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold mb-2">Dollar Values</h4>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="year"
+                      allowDuplicatedCategory={false}
+                      tickMargin={10}
+                    >
+                      <Label value="Year" offset={-30} position="insideBottom" />
+                    </XAxis>
+                    <YAxis
+                      tickMargin={10}
+                      domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}
+                      tickFormatter={(value) => `$${value.toLocaleString()}`}
+                    >
+                      <Label
+                        value="Value (in $)"
+                        offset={100}
+                        position="insideRight"
+                        angle={-90}
+                      />
+                    </YAxis>
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend />
+
+                    {/* Render a line for each toggled metric that is not a percentage */}
+                    {options.map((option, index) => (
+                      !option.includes('%') && toggles[option] && (
+                        <Line
+                          key={option}
+                          type="monotone"
+                          data={chartData[option] || []}
+                          dataKey="value"
+                          name={option}
+                          stroke={colors[index % colors.length]}
+                          strokeWidth={2}
+                          dot={{ r: 4 }}
+                          activeDot={{ r: 6 }}
+                        />
+                      )
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Chart for percentage metrics */}
+            {hasPercentageMetrics && (
+              <div className="mb-8">
+                <h4 className="text-lg font-semibold mb-2">Percentage Values</h4>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart margin={{ top: 20, right: 20, bottom: 30, left: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="year"
+                      allowDuplicatedCategory={false}
+                      tickMargin={10}
+                    >
+                      <Label value="Year" offset={-30} position="insideBottom" />
+                    </XAxis>
+                    <YAxis
+                      tickMargin={10}
+                      domain={['auto', 'auto']}
+                      tickFormatter={(value) => `${value}%`}
+                    >
+                      <Label
+                        value="Percentage (%)"
+                        offset={100}
+                        position="insideRight"
+                        angle={-90}
+                      />
+                    </YAxis>
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend />
+
+                    {/* Render a line for each toggled metric that is a percentage */}
+                    {options.map((option, index) => (
+                      option.includes('%') && toggles[option] && (
+                        <Line
+                          key={option}
+                          type="monotone"
+                          data={chartData[option] || []}
+                          dataKey="value"
+                          name={option}
+                          stroke={colors[index % colors.length]}
+                          strokeWidth={2}
+                          dot={{ r: 4 }}
+                          activeDot={{ r: 6 }}
+                        />
+                      )
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Show message if no metrics are toggled */}
+            {!anyMetricToggled && (
+              <div className="text-center p-10 border rounded bg-gray-50">
+                <p className="text-gray-500">Toggle one or more metrics on the left to display the chart</p>
+              </div>
+            )}
+          </div>
         </div>
-      ))}
-    </div>
-  );
+      </div>
+    );
+  };
+
+  // Generate stress test data
+  useEffect(() => {
+    const generateStressTestData = () => {
+      const years: number[] = [];
+      const currentDate = new Date();
+      for (let i = 0; i < 12; i++) {
+        years.push(Number(currentDate.getFullYear()) + i);
+      }
+
+      // Base revenue values from stress test 2
+      const baseRevenues = [153034, 155329, 157659, 160024, 162424, 164861, 167334, 169844, 172391, 174977, 177602, 180266];
+
+      // Stress Test 1: 30% drop in return rate of investment
+      const stressTest1 = years.map((year, index) => {
+        const principal = baseRevenues[index];
+        const interestLost = principal * 0.3; // 30% drop
+        return {
+          year: year.toString(),
+          principal,
+          interestLost
+        };
+      });
+
+      // Stress Test 2: 2.25% decrease in revenues (from stress test 2)
+      const stressTest2 = years.map((year, index) => {
+        const principal = baseRevenues[index];
+        const interestLost = principal * (2.25 / 100); // 2.25% decrease
+        return {
+          year: year.toString(),
+          principal,
+          interestLost
+        };
+      });
+
+      // Stress Test 3: One-time "X" event of $50,000
+      const stressTest3 = years.map((year, index) => {
+        const principal = baseRevenues[index];
+        const interestLost = index === 0 ? 50000 : 0; // One-time event in first year
+        return {
+          year: year.toString(),
+          principal,
+          interestLost
+        };
+      });
+
+      // Stress Test 4: Increase 2.5% operating expenses each year
+      const stressTest4 = years.map((year, index) => {
+        const principal = baseRevenues[index];
+        const interestLost = principal * (0.025 * (index + 1)); // Increasing by 2.5% each year
+        return {
+          year: year.toString(),
+          principal,
+          interestLost
+        };
+      });
+
+      // Stress Test 5: Decrease bond return to 1.7% due to increase in inflation
+      const stressTest5 = years.map((year, index) => {
+        const principal = baseRevenues[index];
+        const normalReturn = principal * 0.042; // Assuming normal return is 4.2%
+        const reducedReturn = principal * 0.017; // Reduced to 1.7%
+        const interestLost = normalReturn - reducedReturn;
+        return {
+          year: year.toString(),
+          principal,
+          interestLost
+        };
+      });
+
+      return {
+        "Stress Test 1": stressTest1,
+        "Stress Test 2": stressTest2,
+        "Stress Test 3": stressTest3,
+        "Stress Test 4": stressTest4,
+        "Stress Test 5": stressTest5
+      };
+    };
+
+    setStressTestData(generateStressTestData());
+  }, []);
 
   // Fetch financial data from API
   useEffect(() => {
@@ -299,15 +479,7 @@ const ExecutiveHome: React.FC = () => {
             }
           });
 
-          // Add stress test data (using sample data for now)
-          processedChartData["Stress Tests"] = [
-            { year: "2025", goodsSoldCost: 900, grossProfit: 846 },
-            { year: "2026", goodsSoldCost: 1892, grossProfit: 1666 },
-            { year: "2027", goodsSoldCost: 2982, grossProfit: 2395 },
-            { year: "2028", goodsSoldCost: 4180, grossProfit: 2959 },
-            { year: "2029", goodsSoldCost: 5491, grossProfit: 3266 },
-            { year: "2030", goodsSoldCost: 6926, grossProfit: 3221 }
-          ];
+          // Stress test data is now handled in a separate useEffect
 
           setChartData(processedChartData);
         }
@@ -323,29 +495,28 @@ const ExecutiveHome: React.FC = () => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       // Check if this is a stress test chart
-      if (payload[0].payload.goodsSoldCost !== undefined) {
-        const { goodsSoldCost, grossProfit } = payload[0].payload;
+      if (payload[0].dataKey === "principal" || payload[0].dataKey === "interestLost") {
         return (
           <div className="custom-tooltip p-2 bg-white border border-gray-300 rounded shadow-lg">
             <p><strong>Year: </strong>{label}</p>
-            <p><strong>Principal: </strong>${goodsSoldCost?.toLocaleString()}</p>
-            <p><strong>Stress Effect: </strong>${grossProfit?.toLocaleString()}</p>
+            <p><strong>Principal: </strong>${payload.find((p: any) => p.dataKey === "principal")?.value.toLocaleString()}</p>
+            <p><strong>Interest Lost: </strong>${payload.find((p: any) => p.dataKey === "interestLost")?.value.toLocaleString()}</p>
           </div>
         );
       } else {
         // Regular financial data tooltip
-        const dataValue = payload[0].value;
-        const dataName = payload[0].name || '';
-
         return (
           <div className="custom-tooltip p-2 bg-white border border-gray-300 rounded shadow-lg">
             <p><strong>Year: </strong>{label}</p>
-            <p><strong>Value: </strong>{typeof dataValue === 'number' ?
-              dataName.includes('%') ?
-                `${dataValue.toFixed(2)}%` :
-                `$${dataValue.toLocaleString()}`
-              : dataValue}
-            </p>
+            {payload.map((entry: any, index: number) => (
+              <p key={`item-${index}`} style={{ color: entry.color }}>
+                <strong>{entry.name}: </strong>
+                {entry.name.includes('%') ?
+                  `${entry.value.toFixed(2)}%` :
+                  `$${entry.value.toLocaleString()}`
+                }
+              </p>
+            ))}
           </div>
         );
       }
@@ -402,13 +573,12 @@ const ExecutiveHome: React.FC = () => {
                 {/*Stress Test Description*/}
                 <p className="mt-2 text-gray-700">{stressTestDesc[index]}</p>
 
-                {/*Graph Placeholder - only shows if toggle is on*/}
+                {/*Graph - only shows if toggle is on*/}
                 {isOn && (
                   <div className="mt-2 p-4 border rounded bg-gray-100">
-                    {/* <p className="text-gray-600">📊 Graph Placeholder for Stress Test #{index + 1}</p> */}
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart
-                        data={chartData["Stress Tests"] || []} // Use real data if available
+                        data={stressTestData[`Stress Test ${index + 1}`] || []}
                         margin={{ top: 20, right: 20, bottom: 30, left: 60 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
@@ -417,28 +587,16 @@ const ExecutiveHome: React.FC = () => {
                         </XAxis>
                         <YAxis
                           tickMargin={10}
-                          // Dynamically set the domain to range from the rounded lower tick to the rounded upper tick
-                          domain={['auto', (dataMax: number) => {
-                            // Step 1: Round the dataMax to the nearest 500 or 1000 (or your preferred value)
-                            // Round up to the next multiple of 500
-                            return Math.ceil(dataMax / 500) * 500;
-                          }]}
-                          tickFormatter={(tick) => {
-                            // Step 2: Round the tick value to the nearest 500 for cleaner ticks
-                            const roundedTick = Math.round(tick / 500) * 500;
-
-                            // Step 3: Format the tick value with commas and add $ sign
-                            return `$${roundedTick.toLocaleString()}`;
-                          }}
+                          domain={['auto', (dataMax: number) => Math.ceil(dataMax / 500) * 500]}
+                          tickFormatter={(tick) => `$${tick.toLocaleString()}`}
                         >
                           <Label value="Value (in $)" offset={100} position="insideRight" angle={-90} />
                         </YAxis>
 
                         <Tooltip content={<CustomTooltip />} />
-                        {/* Render multiple lines for different stress test scenarios */}
-                        <Line type="monotone" dataKey="goodsSoldCost" stroke="#8884d8" strokeWidth={2} name="Principal" />
-                        <Line type="monotone" dataKey="grossProfit" stroke="#82ca9d" strokeWidth={2} name="Stress Effect" />
-                        {/* Add more lines later */}
+                        <Legend />
+                        <Line type="monotone" dataKey="principal" stroke="#8884d8" strokeWidth={2} name="Principal"/>
+                        <Line type="monotone" dataKey="interestLost" stroke="#82ca9d" strokeWidth={2} name="Interest Lost"/>
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -448,18 +606,17 @@ const ExecutiveHome: React.FC = () => {
           </div>
         ) : (
           /* Sustainability Model section */
-          <div className="p-5 border rounded bg-gray-100">
+          <div className="space-y-6">
             {/* Income Statement Section */}
-            <div className="space-y-6">
+            <div className="p-5 border rounded bg-gray-100">
               {renderChartSection("Income Statement", optionsMap["Income Statement"], incomeToggles, setIncomeToggles)}
             </div>
 
-            {/* White spacer */}
-            <div className="-mx-5 my-16 bg-white h-12 w-auto"></div>
-
+            {/* White space between sections */}
+            <div className="h-8 bg-white"></div>
 
             {/* Balance Sheet Section */}
-            <div className="pt-5 border-t border-gray-200">
+            <div className="p-5 border rounded bg-gray-100">
               {renderChartSection("Balance Sheet", optionsMap["Balance Sheet"], balanceToggles, setBalanceToggles)}
             </div>
           </div>
