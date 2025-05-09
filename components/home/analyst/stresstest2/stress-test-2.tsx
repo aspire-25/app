@@ -29,7 +29,7 @@ const StressTest2 = () => {
     const [st1Output, setSt1Output] = useState<number[]>([153034, 155329, 157659, 160024, 162424, 164861, 167334, 169844, 172391, 174977, 177602, 180266])
 
     const turnIntoChartForm = () => {
-        let arr: { year: number; totalRev: number; decreaseInRev: number }[] = [];
+        const arr: { year: number; totalRev: number; decreaseInRev: number }[] = [];
         years.forEach((x, index) => {
             arr.push({year: x, totalRev: st1Output[index], decreaseInRev: st1Output[index]*(decreaseInRevenues/100)})
         })

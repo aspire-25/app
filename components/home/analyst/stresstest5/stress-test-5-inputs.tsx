@@ -10,9 +10,9 @@ import {
     TableHeader,
     TableRow,
   } from "@/components/ui/table"
-  import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+  import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type ChildProps = {
     onParamsUpdate: (data: Array<number>) => void; // The function to send data back to the parent
@@ -36,7 +36,7 @@ const StressTest5Input: React.FC<ChildProps> = ({ onParamsUpdate, version, intrD
         defaults.interestRate = 1.7
     }
 
-    const convertCamelCaseToNormal = (text: String) => {
+    const convertCamelCaseToNormal = (text: string) => {
         return (text.replace(/[A-Z]/g, letter => ` ${letter}`))[0].toUpperCase() + (text.replace(/[A-Z]/g, letter => ` ${letter}`)).slice(1)
     }
 

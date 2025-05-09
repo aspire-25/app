@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getSession, Session } from "next-auth/react";
+import { getSession } from "next-auth/react";
+import { Session } from "next-auth";
 import NavbarSettings from "@/components/navbar-settings";
-import Page from "@/app/user/page";
+import Home from "@/app/user/page";
 
 const Navbar = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -23,7 +24,7 @@ const Navbar = () => {
         <NavbarSettings session={session} tempRole={tempRole} updateTempRole={setTempRole} />
       </nav>
 
-      <Page tempRole={tempRole} />
+      <Home tempRole={tempRole} />
     </>
   );
 };

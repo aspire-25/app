@@ -1,7 +1,6 @@
 import StressTestInputs from "./stress-tests-inputs"
 import LossOfInterestTable from "../lossOfInterestTable";
 import { useState } from "react"
-import TableDivider from "../tableDivider";
 import {
     Table,
     TableBody,

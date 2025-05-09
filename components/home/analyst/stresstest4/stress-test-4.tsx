@@ -26,7 +26,7 @@ const StressTest4 = () => {
     const [percent, setPercent] = useState(2.5)
 
     const turnIntoChartForm = () => {
-        let arr: { year: number; totalOperatingExp: number; increase: number; forecast: number }[] = [];
+        const arr: { year: number; totalOperatingExp: number; increase: number; forecast: number }[] = [];
         years.forEach((x, index) => {
             arr.push({year: x, totalOperatingExp: totalOpExp[index], increase: totalOpExp[index]*(percent/100), forecast: totalOpExp[index]*(1 + (percent/100))})
         })

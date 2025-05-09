@@ -1,14 +1,10 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import StressTest1 from "./stresstest1/stress-test-1"
 import StressTest2 from "./stresstest2/stress-test-2"
 import StressTest3 from "./stresstest3/stress-test-3"
 import StressTest4 from "./stresstest4/stress-test-4"
 import StressTest5 from "./stresstest5/stress-test-5"
-import TableDivider from "./tableDivider"
 
-import Image from "next/image"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import React from "react"
 
 

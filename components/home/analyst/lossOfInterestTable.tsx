@@ -9,7 +9,6 @@ import {
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import React from "react";
 
 interface ChildProps {
@@ -35,9 +34,6 @@ const LossOfInterestTable: React.FC<ChildProps> = ({ principalData }) => {
         })
         return sum;
     }
-
-    const [varToDisplay, setVarToDisplay] = React.useState("principal")
-    console.log(varToDisplay);
 
     const convertIncomingToChart = () => {
         const cleanedDataArray = []

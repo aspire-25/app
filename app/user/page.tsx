@@ -7,7 +7,7 @@ import { useLayoutEffect, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AuditorHomeAdjusted from "@/components/home/auditor/auditor-home-adjusted";
 
-const Page = ({ tempRole }: { tempRole: string }) => {
+const Home = ({ tempRole }: any) => {
     const router = useRouter();
 
     useLayoutEffect(() => {
@@ -30,4 +30,4 @@ const Page = ({ tempRole }: { tempRole: string }) => {
     );
 };
 
-export default Page;
+export default Home;
